@@ -23,7 +23,8 @@
       "Bash(findstr :5000)",
       "Bash(taskkill:*)",
       "Bash(dir \"C:\\\\Users\\\\LAKSHMANA~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-LAKSHMANA-PAVAN-OneDrive-Desktop-interview-prep\\\\dcb2aeb4-25f9-4752-983b-de7c20b308fd\\\\tasks\\\\\" /b)",
-      "Bash(dir C:\\\\Users\\\\LAKSHMANA~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-LAKSHMANA-PAVAN-OneDrive-Desktop-interview-prep\\\\dcb2aeb4-25f9-4752-983b-de7c20b308fd\\\\tasks:*)"
+      "Bash(dir C:\\\\Users\\\\LAKSHMANA~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-LAKSHMANA-PAVAN-OneDrive-Desktop-interview-prep\\\\dcb2aeb4-25f9-4752-983b-de7c20b308fd\\\\tasks:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

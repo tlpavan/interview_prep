@@ -552,7 +552,7 @@ async function runLiveMicProbe(durationMs = 2500) {
 
   let maxLevel = 0;
   let detectedSpeech = false;
-  const threshold = 1.5;
+  const threshold = 0.02; // Raw RMS threshold (0.02 is quiet speech)
 
   await new Promise(resolve => {
     const startedAt = Date.now();
@@ -562,8 +562,10 @@ async function runLiveMicProbe(durationMs = 2500) {
       const level = Math.min(100, Number((rms * 220).toFixed(2)));
       maxLevel = Math.max(maxLevel, level);
       setMicLevel(level);
-      if (level >= threshold) {
+      // Use RMS threshold (more accurate than percentage for detection)
+      if (rms >= threshold) {
         detectedSpeech = true;
+        setMicSignalState(`Voice detected (${Math.round(level)}%)`);
       }
       if (Date.now() - startedAt >= durationMs) {
         clearInterval(timer);

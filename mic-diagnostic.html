@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microphone Diagnostic Tool</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+
+    .section h2 {
+      color: #333;
+      font-size: 18px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status {
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-weight: 500;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .mic-level-bar {
+      width: 100%;
+      height: 40px;
+      background: #e9ecef;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 15px 0;
+      position: relative;
+    }
+
+    .mic-level-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      width: 0%;
+      transition: width 0.1s ease;
+      border-radius: 20px;
+    }
+
+    .mic-level-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+      color: #333;
+      text-shadow: 0 0 4px white;
+    }
+
+    .device-select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+
+    .device-select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .test-result {
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      margin: 10px 0;
+      border: 1px solid #dee2e6;
+    }
+
+    .test-result p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    .test-result .transcript {
+      font-style: italic;
+      color: #495057;
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+
+    .instructions {
+      background: #e7f3ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .instructions ol {
+      margin-left: 20px;
+      margin-top: 10px;
+    }
+
+    .instructions li {
+      margin: 8px 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .browser-support {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .browser-item {
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .browser-item.supported {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .browser-item.unsupported {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎤 Microphone Diagnostic Tool</h1>
+    <p class="subtitle">Diagnose and fix microphone issues for InterviewPrep AI</p>
+
+    <!-- Browser Support -->
+    <div class="section">
+      <h2>🌐 Browser Support Check</h2>
+      <div class="browser-support" id="browserSupport">
+        <div class="browser-item">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Device Selection -->
+    <div class="section">
+      <h2>🎙️ Select Microphone</h2>
+      <select id="micDeviceSelect" class="device-select">
+        <option value="default">Default Microphone</option>
+      </select>
+      <button class="btn btn-secondary" onclick="refreshDevices()">🔄 Refresh Devices</button>
+      <div id="deviceStatus" class="status info" style="margin-top: 10px;">
+        Checking available devices...
+      </div>
+    </div>
+
+    <!-- Live Audio Level Monitor -->
+    <div class="section">
+      <h2>📊 Live Audio Level</h2>
+      <div class="mic-level-bar">
+        <div class="mic-level-fill" id="levelFill"></div>
+        <div class="mic-level-text" id="levelText">0%</div>
+      </div>
+      <button class="btn btn-primary" id="startMonitorBtn" onclick="startLevelMonitor()">
+        ▶️ Start Level Monitor (5 seconds)
+      </button>
+      <button class="btn btn-secondary" id="stopMonitorBtn" onclick="stopLevelMonitor()" disabled>
+        ⏹️ Stop
+      </button>
+      <div id="monitorStatus" class="status info" style="margin-top: 10px;">
+        Ready to monitor. Click "Start Level Monitor" and speak into your microphone.
+      </div>
+    </div>
+
+    <!-- Full Speech Recognition Test -->
+    <div class="section">
+      <h2>🗣️ Speech Recognition Test</h2>
+      <div class="instructions">
+        <strong>Steps:</strong>
+        <ol>
+          <li>Make sure the level monitor shows audio when you speak</li>
+          <li>Click "Start Speech Test" below</li>
+          <li>Speak clearly: "Hello, this is a microphone test"</li>
+          <li>Wait for transcription result</li>
+        </ol>
+      </div>
+      <button class="btn btn-primary" id="speechTestBtn" onclick="runSpeechTest()">
+        🎤 Start Speech Test
+      </button>
+      <div id="speechTestResult" class="test-result hidden">
+        <p><strong>Result:</strong></p>
+        <div class="transcript" id="speechTranscript"></div>
+        <p id="speechMetrics"></p>
+      </div>
+      <div id="speechStatus" class="status info" style="margin-top: 10px;">
+        Ready to test speech recognition.
+      </div>
+    </div>
+
+    <!-- Summary & Recommendations -->
+    <div class="section" id="summarySection" style="display: none;">
+      <h2>📋 Diagnostic Summary</h2>
+      <div id="summaryContent"></div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="section">
+      <h2>🔧 Troubleshooting Guide</h2>
+      <div class="instructions">
+        <h3>If no audio level is detected:</h3>
+        <ol>
+          <li><strong>Check microphone volume:</strong> Go to Windows Sound Settings and ensure microphone volume is above 50% and not muted</li>
+          <li><strong>Select correct device:</strong> Use the dropdown above to select your microphone</li>
+          <li><strong>Close other apps:</strong> Zoom, Teams, Discord, etc. might be using the mic</li>
+          <li><strong>Refresh page:</strong> After selecting device, refresh and try again</li>
+          <li><strong>Check browser permissions:</strong> Click the lock icon in address bar and ensure microphone is allowed</li>
+          <li><strong>Try different browser:</strong> Chrome or Edge work best</li>
+        </ol>
+
+        <h3 style="margin-top: 15px;">If audio level detected but speech fails:</h3>
+        <ol>
+          <li><strong>Check internet:</strong> Speech recognition requires internet connection</li>
+          <li><strong>Speak clearly:</strong> Speak at normal pace, not too fast or slow</li>
+          <li><strong>Reduce noise:</strong> Move to quieter environment</li>
+          <li><strong>Try text fallback:</strong> Use type input instead of voice</li>
+          <li><strong>Check API keys:</strong> Ensure Gemini API key is configured</li>
+        </ol>
+
+        <h3 style="margin-top: 15px;">Browser-specific notes:</h3>
+        <ul>
+          <li><strong>Chrome/Edge:</strong> Best support, recommended</li>
+          <li><strong>Firefox:</strong> Good support but may need重启</li>
+          <li><strong>Safari:</strong> Limited Web Speech API support</li>
+          <li><strong>Incognito/Private:</strong> Some features may be blocked</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let monitorInterval = null;
+    let selectedDeviceId = 'default';
+    let audioContext = null;
+    let analyser = null;
+    let source = null;
+    let stream = null;
+
+    const levelFill = document.getElementById('levelFill');
+    const levelText = document.getElementById('levelText');
+    const monitorStatus = document.getElementById('monitorStatus');
+    const deviceStatus = document.getElementById('deviceStatus');
+    const micDeviceSelect = document.getElementById('micDeviceSelect');
+    const speechStatus = document.getElementById('speechStatus');
+    const speechTestResult = document.getElementById('speechTestResult');
+    const speechTranscript = document.getElementById('speechTranscript');
+    const speechMetrics = document.getElementById('speechMetrics');
+
+    function setStatus(element, message, type = 'info') {
+      element.className = `status ${type}`;
+      element.innerText = message;
+    }
+
+    function checkBrowserSupport() {
+      const support = {
+        speechRecognition: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+        mediaDevices: !!(navigator.mediaDevices?.getUserMedia),
+        audioContext: !!(window.AudioContext || window.webkitAudioContext),
+        webkitSpeechRecognition: !!window.webkitSpeechRecognition
+      };
+
+      const container = document.getElementById('browserSupport');
+      container.innerHTML = `
+        <div class="browser-item ${support.mediaDevices ? 'supported' : 'unsupported'}">
+          MediaDevices: ${support.mediaDevices ? '✅' : '❌'}
+        </div>
+        <div class="browser-item ${support.audioContext ? 'supported' : 'unsupported'}">
+          Web Audio: ${support.audioContext ? '✅' : '❌'}
+        </div>
+        <div class="browser-item ${support.speechRecognition ? 'supported' : 'unsupported'}">
+          Speech API: ${support.speechRecognition ? '✅' : '❌'}
+        </div>
+        <div class="browser-item ${support.webkitSpeechRecognition ? 'supported' : 'unsupported'}">
+          WebKit Speech: ${support.webkitSpeechRecognition ? '✅' : '❌'}
+        </div>
+      `;
+
+      return support;
+    }
+
+    async function refreshDevices() {
+      try {
+        if (!navigator.mediaDevices?.enumerateDevices) {
+          setStatus(deviceStatus, 'Device enumeration not supported', 'error');
+          return;
+        }
+
+        // Request permission first if needed
+        try {
+          const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          tempStream.getTracks().forEach(track => track.stop());
+        } catch (err) {
+          setStatus(deviceStatus, 'Microphone permission denied. Please allow microphone access and refresh.', 'error');
+          return;
+        }
+
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const inputs = devices.filter(d => d.kind === 'audioinput');
+
+        micDeviceSelect.innerHTML = '<option value="default">Default Microphone</option>';
+        inputs.forEach((device, index) => {
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          option.textContent = device.label || `Microphone ${index + 1}`;
+          micDeviceSelect.appendChild(option);
+        });
+
+        if (inputs.length === 0) {
+          setStatus(deviceStatus, 'No microphones found', 'error');
+        } else {
+          setStatus(deviceStatus, `Found ${inputs.length} microphone(s). Select your preferred device.`, 'success');
+          if (selectedDeviceId !== 'default') {
+            micDeviceSelect.value = selectedDeviceId;
+          }
+        }
+      } catch (error) {
+        setStatus(deviceStatus, `Error listing devices: ${error.message}`, 'error');
+      }
+    }
+
+    async function startLevelMonitor(duration = 5000) {
+      try {
+        stopLevelMonitor();
+
+        const constraints = selectedDeviceId === 'default'
+          ? { audio: true }
+          : { audio: { deviceId: { exact: selectedDeviceId } } };
+
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        source = audioContext.createMediaStreamSource(stream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+
+        source.connect(analyser);
+        const data = new Float32Array(analyser.fftSize);
+
+        const startedAt = Date.now();
+        let maxLevel = 0;
+
+        setStatus(monitorStatus, 'Monitoring... Speak now!', 'info');
+        document.getElementById('startMonitorBtn').disabled = true;
+        document.getElementById('stopMonitorBtn').disabled = false;
+
+        monitorInterval = setInterval(() => {
+          analyser.getFloatTimeDomainData(data);
+          const rms = Math.sqrt(data.reduce((sum, val) => sum + val * val, 0) / data.length);
+          const level = Math.min(100, rms * 200);
+
+          levelFill.style.width = `${level}%`;
+          levelText.innerText = `${Math.round(level)}%`;
+
+          if (level > maxLevel) {
+            maxLevel = level;
+          }
+
+          if (Date.now() - startedAt >= duration) {
+            stopLevelMonitor();
+            if (maxLevel < 5) {
+              setStatus(monitorStatus, `Monitor complete: Max level ${Math.round(maxLevel)}% - NO AUDIO DETECTED. Check mic volume and device selection.`, 'error');
+            } else if (maxLevel < 15) {
+              setStatus(monitorStatus, `Monitor complete: Max level ${Math.round(maxLevel)}% - AUDIO DETECTED but low. Increase mic volume.`, 'warning');
+            } else {
+              setStatus(monitorStatus, `Monitor complete: Max level ${Math.round(maxLevel)}% - AUDIO WORKING! You can proceed with speech test.`, 'success');
+            }
+          }
+        }, 100);
+
+      } catch (error) {
+        stopLevelMonitor();
+        setStatus(monitorStatus, `Error: ${error.message}`, 'error');
+      }
+    }
+
+    function stopLevelMonitor() {
+      if (monitorInterval) {
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+
+      if (source) {
+        try { source.disconnect(); } catch {}
+        source = null;
+      }
+      if (analyser) {
+        try { analyser.disconnect(); } catch {}
+        analyser = null;
+      }
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      if (audioContext) {
+        try { audioContext.close(); } catch {}
+        audioContext = null;
+      }
+
+      document.getElementById('startMonitorBtn').disabled = false;
+      document.getElementById('stopMonitorBtn').disabled = true;
+    }
+
+    async function runSpeechTest() {
+      if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+        setStatus(speechStatus, 'Speech recognition not available in this browser', 'error');
+        return;
+      }
+
+      speechTestResult.classList.add('hidden');
+      speechStatus.innerText = 'Starting speech test...';
+      setStatus(speechStatus, 'Starting speech test...', 'info');
+
+      try {
+        const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new Recognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = true;
+        recognition.continuous = false;
+        recognition.maxAlternatives = 3;
+
+        let transcript = '';
+        let completed = false;
+
+        recognition.onstart = () => {
+          speechStatus.innerText = 'Listening... Speak clearly now.';
+          setStatus(speechStatus, 'Listening... Speak now', 'info');
+        };
+
+        recognition.onresult = (event) => {
+          const result = event.results[event.results.length - 1];
+          if (result) {
+            transcript = result[0].transcript;
+            speechTranscript.innerText = `"${transcript}"`;
+            speechStatus.innerText = `Heard: ${transcript}`;
+          }
+        };
+
+        recognition.onerror = (event) => {
+          const error = event.error;
+          let msg = error;
+          if (error === 'no-speech') msg = 'No speech detected. Speak louder and closer to mic.';
+          if (error === 'network') msg = 'Network error. Check internet connection.';
+          if (error === 'not-allowed') msg = 'Microphone permission denied.';
+          setStatus(speechStatus, `Error: ${msg}`, 'error');
+          completed = true;
+        };
+
+        recognition.onend = () => {
+          if (!completed) {
+            if (transcript) {
+              setStatus(speechStatus, 'Speech recognition successful!', 'success');
+              speechMetrics.innerText = '✅ Transcription working correctly';
+              speechTestResult.classList.remove('hidden');
+            } else {
+              setStatus(speechStatus, 'No transcript received. Try speaking louder.', 'warning');
+              speechMetrics.innerText = '⚠️ Audio may be too quiet';
+              speechTestResult.classList.remove('hidden');
+              speechTranscript.innerText = '(No transcription - check audio level)';
+            }
+            completed = true;
+          }
+        };
+
+        recognition.start();
+
+        // Auto-stop after 8 seconds
+        setTimeout(() => {
+          if (!completed) {
+            recognition.stop();
+          }
+        }, 8000);
+
+      } catch (error) {
+        setStatus(speechStatus, `Error: ${error.message}`, 'error');
+      }
+    }
+
+    micDeviceSelect.addEventListener('change', async () => {
+      selectedDeviceId = micDeviceSelect.value;
+      localStorage.setItem('selectedMicDeviceId', selectedDeviceId);
+      setStatus(deviceStatus, `Device changed to: ${micDeviceSelect.options[micDeviceSelect.selectedIndex].text}. Try level monitor first.`, 'info');
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      checkBrowserSupport();
+      await refreshDevices();
+
+      const savedDevice = localStorage.getItem('selectedMicDeviceId');
+      if (savedDevice && savedDevice !== 'default') {
+        selectedDeviceId = savedDevice;
+        micDeviceSelect.value = savedDevice;
+      }
+
+      setStatus(deviceStatus, 'Devices loaded. Select your microphone and test.', 'info');
+      setStatus(speechStatus, 'Ready. Ensure audio level is working first.', 'info');
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      stopLevelMonitor();
+    });
+  </script>
+</body>
+</html>
