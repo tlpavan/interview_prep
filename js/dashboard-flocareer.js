@@ -352,6 +352,8 @@ function updateSkillsChart(sessions) {
 
 // ===== LOAD JOB OPENINGS (Mock Data) =====
 function loadJobOpenings() {
+  console.log("🔍 [JOBS] Loading job openings...");
+
   // Mock job data - in production, this would come from an API
   const mockOpenings = [
     {
@@ -406,25 +408,41 @@ function loadJobOpenings() {
 
   const grid = document.getElementById('openingsGrid');
 
+  if (!grid) {
+    console.error("❌ [JOBS] openingsGrid element not found!");
+    return;
+  }
+
+  console.log(`✅ [JOBS] Found openingsGrid element, loading ${mockOpenings.length} jobs...`);
+
+  // Build HTML
+  const jobsHTML = mockOpenings.map(job => `
+    <a href="#" class="opening-card" onclick="alert('This would redirect to the job application page'); return false;">
+      <div class="opening-header">
+        <div>
+          <div class="opening-company">${job.company}</div>
+          <div class="opening-role">${job.role}</div>
+        </div>
+        <span class="opening-badge">${job.badge}</span>
+      </div>
+      <p class="opening-description">${job.description}</p>
+      <div class="opening-meta">
+        <span class="opening-meta-item">📍 ${job.location}</span>
+        <span class="opening-meta-item">💼 ${job.type}</span>
+      </div>
+    </a>
+  `).join('');
+
   // In production, replace with actual API call
   setTimeout(() => {
-    grid.innerHTML = mockOpenings.map(job => `
-      <a href="#" class="opening-card" onclick="alert('This would redirect to the job application page'); return false;">
-        <div class="opening-header">
-          <div>
-            <div class="opening-company">${job.company}</div>
-            <div class="opening-role">${job.role}</div>
-          </div>
-          <span class="opening-badge">${job.badge}</span>
-        </div>
-        <p class="opening-description">${job.description}</p>
-        <div class="opening-meta">
-          <span class="opening-meta-item">📍 ${job.location}</span>
-          <span class="opening-meta-item">💼 ${job.type}</span>
-        </div>
-      </a>
-    `).join('');
-  }, 1000);
+    try {
+      grid.innerHTML = jobsHTML;
+      console.log(`✅ [JOBS] Successfully loaded ${mockOpenings.length} job openings`);
+    } catch (error) {
+      console.error("❌ [JOBS] Error rendering jobs:", error);
+      grid.innerHTML = `<div class="error-message">Failed to load job openings. Please refresh.</div>`;
+    }
+  }, 500); // Reduced from 1000ms for faster loading
 }
 
 // ===== CHATBOT =====
