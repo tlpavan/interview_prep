@@ -312,28 +312,97 @@ function stopActiveCapture() {
 }
 
 async function ensureMicPermission() {
+  console.log("🔍 [DEBUG] ensureMicPermission() called");
+  setMicPermissionState("Checking...");
+
   if (!navigator.mediaDevices?.getUserMedia) {
+    console.error("❌ [DEBUG] getUserMedia NOT supported");
     setMicPermissionState("Unsupported");
     throw new Error("Microphone API not supported in this browser.");
   }
+
+  // Check permission state
   if (navigator.permissions?.query) {
     try {
       const status = await navigator.permissions.query({ name: "microphone" });
-      logSystem(`Mic permission: ${status.state}`);
+      console.log(`📋 [DEBUG] Permission state: ${status.state}`);
       setMicPermissionState(status.state);
-    } catch {
-      logSystem("Mic permission: unknown");
+      if (status.state === "denied") {
+        throw new Error("Microphone permission denied. Please allow microphone access in browser settings.");
+      }
+    } catch (err) {
+      console.warn(`⚠️ [DEBUG] Permission query failed:`, err);
       setMicPermissionState("Unknown");
     }
   }
+
+  // Try to get media stream
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: getAudioConstraints() });
-    stream.getTracks().forEach(track => track.stop());
+    console.log("🎤 [DEBUG] Requesting microphone access...");
+    const constraints = getAudioConstraints();
+    console.log("📝 [DEBUG] Audio constraints:", constraints);
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: constraints });
+    console.log("✅ [DEBUG] Microphone access granted!", stream);
+
+    // Log track info
+    const audioTracks = stream.getAudioTracks();
+    console.log(`🎵 [DEBUG] Got ${audioTracks.length} audio track(s)`);
+
+    if (audioTracks.length > 0) {
+      const track = audioTracks[0];
+      console.log(`🎵 [DEBUG] Track: ${track.label}`);
+      console.log(`🎵 [DEBUG] Enabled: ${track.enabled}, Muted: ${track.muted}`);
+      if (track.getSettings) {
+        console.log(`🎵 [DEBUG] Settings:`, track.getSettings());
+      }
+    }
+
+    // Stop stream
+    stream.getTracks().forEach(track => {
+      console.log(`🛑 [DEBUG] Stopping track: ${track.label}`);
+      track.stop();
+    });
+
     setMicPermissionState("Granted");
-    await loadMicDevices().catch(() => {});
+    console.log("✅ [DEBUG] Permission check complete - GRANTED");
+
+    // Refresh device list
+    try {
+      await loadMicDevices();
+      const select = document.getElementById("mic-device-select");
+      if (select) {
+        console.log(`📱 [DEBUG] Loaded ${select.options.length} microphone(s)`);
+        console.log(`📱 [DEBUG] Selected: ${select.value || 'default'}`);
+      }
+    } catch (e) {
+      console.warn(`⚠️ [DEBUG] Device refresh failed:`, e);
+    }
+
+    return true;
   } catch (error) {
+    console.error("❌ [DEBUG] Microphone access FAILED:", error);
+    console.error("❌ [DEBUG] Error name:", error.name);
+    console.error("❌ [DEBUG] Error message:", error.message);
+
     setMicPermissionState("Denied");
-    throw error;
+
+    // Give specific guidance
+    let userMessage = error.message;
+
+    if (error.name === 'NotAllowedError' || error.message.includes('permission')) {
+      userMessage = "🚫 Microphone permission denied. Click the padlock icon 🔒 in address bar → Site settings → Microphone → Allow, then refresh page.";
+    } else if (error.name === 'NotFoundError' || error.message.includes('device')) {
+      userMessage = "🔍 No microphone found. Make sure your mic is connected and working in Windows Sound settings.";
+    } else if (error.name === 'NotReadableError' || error.message.includes('busy')) {
+      userMessage = "⏳ Microphone is busy. Close Zoom, Teams, Discord, or any app using the mic, then refresh and try again.";
+    } else if (error.name === 'OverconstrainedError') {
+      userMessage = "⚠️ Your microphone doesn't meet the requested constraints. The system will try fallback methods.";
+      setMicPermissionState("Partial");
+      return false;
+    }
+
+    throw new Error(userMessage);
   }
 }
 
