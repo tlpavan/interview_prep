@@ -65,11 +65,26 @@
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 16px !important;
   padding: 16px 20px !important;
-  color: white !important;
+  color: var(--text-primary, #ffffff) !important;
   font-family: inherit !important;
   font-size: 16px !important;
   transition: all 0.3s ease !important;
   width: 100% !important;
+}
+
+/* Light theme overrides for inputs */
+@media (prefers-color-scheme: light), .light-theme {
+  .creative-input,
+  .creative-input:focus {
+    color: #1f2c3d !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(31, 44, 61, 0.2) !important;
+  }
+
+  .creative-input:focus {
+    border-color: rgba(102, 126, 234, 0.6) !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+  }
 }
 
 .creative-input:focus {
@@ -77,6 +92,15 @@
   border-color: rgba(102, 126, 234, 0.6) !important;
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
   background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary, #ffffff) !important;
+}
+
+/* Force dark text for any element on light background */
+.bg-light,
+[data-theme="light"],
+body:not(.dark-theme) .creative-input,
+.light-override * {
+  color: #1f2c3d !important;
 }
 
 .creative-nav {

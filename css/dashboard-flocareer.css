@@ -1116,6 +1116,8 @@ section.revealed {
   border-radius: var(--radius-md);
   font-size: 0.9rem;
   font-family: var(--font-family);
+  color: var(--text-primary);
+  background: white;
 }
 
 .chatbot-input:focus {

@@ -371,7 +371,7 @@ async function captureBySpeechApi(attempt = 1) {
 
     recognition.onstart = () => {
       setMicPath("SpeechRecognition");
-      setMicStatus("Listening... Speak now");
+      setMicStatus("🎤 Listening... Speak now");
       logSystem("SpeechRecognition started");
       timeout = setTimeout(() => {
         try {
@@ -381,26 +381,31 @@ async function captureBySpeechApi(attempt = 1) {
     };
 
     recognition.onaudiostart = () => {
-      setMicStatus("Mic active. Speak now.");
+      setMicStatus("🎤 Mic active. Speak now.");
       setMicSignalState("Audio stream active");
       logSystem("SpeechRecognition audio start");
     };
 
     recognition.onspeechstart = () => {
-      setMicStatus("Speech detected. Keep talking.");
-      setMicSignalState("Voice detected");
+      setMicStatus("🎤 Speech detected... Keep talking");
+      setMicSignalState("Voice detected ✓");
       logSystem("SpeechRecognition speech start");
     };
 
     recognition.onspeechend = () => {
-      setMicStatus("Processing your voice...");
+      setMicStatus("Processing your speech...");
       logSystem("SpeechRecognition speech end");
-      if (transcript) stopSoon();
+      // Don't stop immediately on interim results, wait a bit
+      if (transcript && settled) {
+        stopSoon();
+      }
     };
 
     recognition.onresult = event => {
       if (!event.results?.length) return;
       const parts = [];
+      const isFinal = event.results[event.results.length - 1].isFinal;
+
       for (let i = 0; i < event.results.length; i += 1) {
         const piece = event.results[i]?.[0]?.transcript?.trim() || "";
         if (piece) parts.push(piece);
@@ -408,10 +413,16 @@ async function captureBySpeechApi(attempt = 1) {
       const merged = parts.join(" ").replace(/\s+/g, " ").trim();
       if (merged) {
         transcript = merged;
-        setMicSignalState("Transcript captured");
-        setMicStatus(`Heard: "${merged}"`);
-        logSystem(`SpeechRecognition partial: ${merged}`);
-        stopSoon();
+        const status = isFinal ? "Final: " : "Partial: ";
+        setMicSignalState(isFinal ? "Transcript captured ✓" : "Hearing...");
+        setMicStatus(`${isFinal ? "✓" : "..."} Heard: "${merged}"`);
+        logSystem(`SpeechRecognition ${isFinal ? 'final' : 'partial'}: ${merged}`);
+
+        // Stop soon if final result
+        if (isFinal) {
+          settled = true;
+          stopSoon();
+        }
       }
     };
 
