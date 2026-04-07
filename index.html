@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InterviewPrep AI - Master Your Career</title>
+  <link rel="stylesheet" href="css/style-creative.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@motionone/stable/dist/index.umd.js"></script>
+  <script type="module" src="js/auth.js"></script>
+  <style>
+    /* Particle background */
+    #particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      background: radial-gradient(circle, rgba(102, 126, 234, 0.6) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 15s infinite ease-in-out;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+      50% { transform: translate(50px, -100px) scale(1.2); opacity: 0.7; }
+    }
+  </style>
+</head>
+<body class="auth-page">
+  <div id="particles"></div>
+
+  <main class="auth-layout">
+    <section class="auth-hero fade-in">
+      <div class="hero-content">
+        <div class="hero-badge mb-md">
+          <span class="chip success">✨ AI-Powered</span>
+          <span class="chip">🎤 Voice Interviews</span>
+          <span class="chip">📊 Real-time Feedback</span>
+        </div>
+
+        <h1 class="mb-md">
+          <span class="text-gradient">Master Your</span><br>
+          <span class="gradient-text">Interview Skills</span>
+        </h1>
+
+        <p class="hero-description text-secondary mb-lg" style="font-size: 1.2rem; max-width: 600px;">
+          Experience the future of interview preparation. Practice with an AI coach that evaluates your
+          voice, technical knowledge, and communication — all in real-time.
+        </p>
+
+        <div class="hero-stats stagger mb-lg">
+          <div class="stat-card glass-card p-sm scale-in">
+            <div class="stat-value" style="font-size: 2rem; font-weight: 800; color: #667eea;">10K+</div>
+            <div class="stat-label text-muted">Interviews Practiced</div>
+          </div>
+          <div class="stat-card glass-card p-sm scale-in">
+            <div class="stat-value" style="font-size: 2rem; font-weight: 800; color: #764ba2;">4.8</div>
+            <div class="stat-label text-muted">Average Rating</div>
+          </div>
+          <div class="stat-card glass-card p-sm scale-in">
+            <div class="stat-value" style="font-size: 2rem; font-weight: 800; color: #f093fb;">95%</div>
+            <div class="stat-label text-muted">Success Rate</div>
+          </div>
+        </div>
+
+        <div class="feature-grid grid grid-3 mb-lg" style="max-width: 600px; gap: 12px;">
+          <div class="feature-item glass-card p-sm text-center slide-up" style="animation-delay: 0.1s;">
+            <div style="font-size: 1.5rem; margin-bottom: 8px;">🎯</div>
+            <div class="feature-title" style="font-weight: 600;">Adaptive Questions</div>
+          </div>
+          <div class="feature-item glass-card p-sm text-center slide-up" style="animation-delay: 0.2s;">
+            <div style="font-size: 1.5rem; margin-bottom: 8px;">🎤</div>
+            <div class="feature-title" style="font-weight: 600;">Voice & Text</div>
+          </div>
+          <div class="feature-item glass-card p-sm text-center slide-up" style="animation-delay: 0.3s;">
+            <div style="font-size: 1.5rem; margin-bottom: 8px;">📈</div>
+            <div class="feature-title" style="font-weight: 600;">Progress Tracking</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-panel glass-card fade-in" style="animation-delay: 0.3s;">
+      <div class="auth-panel__top">
+        <div>
+          <p class="panel-kicker">Welcome Back</p>
+          <h2 id="auth-title">Sign in to your account</h2>
+        </div>
+        <div class="auth-toggle" role="tablist" aria-label="Auth mode">
+          <button id="tab-login" class="auth-toggle__btn active" type="button">Login</button>
+          <button id="tab-register" class="auth-toggle__btn" type="button">Register</button>
+        </div>
+      </div>
+
+      <section id="panel-login" class="auth-card active" aria-live="polite">
+        <form id="login-form" class="auth-form">
+          <div class="input-group">
+            <label class="input-label">Email Address</label>
+            <input id="loginEmail" type="email" class="input-field" placeholder="you@company.com" autocomplete="email" required>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Password</label>
+            <div class="password-field">
+              <input id="loginPassword" type="password" class="input-field" placeholder="Enter your password" autocomplete="current-password" required>
+              <button type="button" class="btn btn-icon btn-secondary password-toggle" data-target="loginPassword" style="position: absolute; right: 8px; top: 8px; width: 40px; height: 40px; padding: 0;">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <button id="login-btn" class="btn btn-primary auth-submit mt-md" type="submit" style="width: 100%;">
+            <span>Sign In</span>
+            <span>→</span>
+          </button>
+
+          <div class="divider text-center my-md">
+            <span class="text-muted" style="position: relative; padding: 0 16px;">
+              <span style="position: absolute; left: -100%; top: 50%; width: 100%; height: 1px; background: var(--glass-border);"></span>
+              OR
+              <span style="position: absolute; right: -100%; top: 50%; width: 100%; height: 1px; background: var(--glass-border);"></span>
+            </span>
+          </div>
+
+          <button id="google-login-btn" class="btn btn-secondary auth-submit" type="button" style="width: 100%;">
+            <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right: 8px;">
+              <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          <p class="switch-copy text-center mt-md">
+            New here? <button id="switch-to-register" class="btn btn-text" type="button" style="padding: 0; font-weight: 600;">Create an account</button>
+          </p>
+
+          <p class="text-center mt-sm">
+            <a href="/forgot-password.html" class="btn btn-text" style="padding: 0; color: #667eea; font-weight: 500; text-decoration: none;">Forgot your password?</a>
+          </p>
+
+          <p id="msg-login" class="auth-message text-center mt-sm" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section id="panel-register" class="auth-card" aria-live="polite">
+        <form id="register-form" class="auth-form">
+          <div class="input-group">
+            <label class="input-label">Full Name</label>
+            <input id="username" type="text" class="input-field" placeholder="John Doe" autocomplete="name" required>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Email Address</label>
+            <input id="regEmail" type="email" class="input-field" placeholder="you@company.com" autocomplete="email" required>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Create Password</label>
+            <div class="password-field">
+              <input id="regPassword" type="password" class="input-field" placeholder="At least 6 characters" autocomplete="new-password" required>
+              <button type="button" class="btn btn-icon btn-secondary password-toggle" data-target="regPassword" style="position: absolute; right: 8px; top: 8px; width: 40px; height: 40px; padding: 0;">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <button id="register-btn" class="btn btn-primary auth-submit mt-md" type="submit" style="width: 100%;">
+            <span>Create Account</span>
+            <span>✨</span>
+          </button>
+
+          <p class="switch-copy text-center mt-md">
+            Already have an account? <button id="switch-to-login" class="btn btn-text" type="button" style="padding: 0; font-weight: 600;">Sign in</button>
+          </p>
+
+          <p id="msg-register" class="auth-message text-center mt-sm" aria-live="polite"></p>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // Create floating particles
+    const particlesContainer = document.getElementById('particles');
+    const particleCount = 20;
+    const colors = ['rgba(102, 126, 234, 0.6)', 'rgba(118, 75, 162, 0.6)', 'rgba(240, 147, 251, 0.6)', 'rgba(77, 171, 247, 0.6)'];
+
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      const size = Math.random() * 60 + 20;
+      particle.style.width = size + 'px';
+      particle.style.height = size + 'px';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.top = Math.random() * 100 + '%';
+      particle.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]} 0%, transparent 70%)`;
+      particle.style.animationDelay = Math.random() * 10 + 's';
+      particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+      particlesContainer.appendChild(particle);
+    }
+  </script>
+</body>
+</html>

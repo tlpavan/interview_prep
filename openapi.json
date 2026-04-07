@@ -1,0 +1,218 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "InterviewPrep AI API",
+    "description": "API for interview preparation platform with AI-powered feedback",
+    "version": "1.0.0",
+    "contact": {
+      "name": "InterviewPrep AI Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Check if the service is running",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "healthy",
+                  "timestamp": "2025-04-06T12:00:00.000Z",
+                  "uptime": 123.45,
+                  "environment": "development"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/interview/start": {
+      "post": {
+        "summary": "Start a new interview session",
+        "description": "Creates a new interview session and returns initial feedback based on provided info",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "Candidate name" },
+                  "type": { "type": "string", "enum": ["technical", "hr"], "description": "Interview type" },
+                  "domain": { "type": "string", "description": "Interview domain (e.g., web development)" },
+                  "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"], "description": "Difficulty level" },
+                  "totalQuestions": { "type": "number", "description": "Number of questions" },
+                  "answers": { "type": "array", "items": { "type": "object" }, "description": "Pre-filled answers (optional)" }
+                },
+                "required": ["name", "type", "domain", "difficulty"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interview started",
+            "content": {
+              "application/json": {
+                "example": {
+                  "confidence": 50,
+                  "vocabulary": 30,
+                  "technical": 28,
+                  "communication": 35,
+                  "suggestions": [
+                    "Keep answers structured with problem, approach, and result.",
+                    "Use one concrete example in each answer.",
+                    "Keep each answer focused on impact and outcomes."
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/resume/analyze": {
+      "post": {
+        "summary": "Analyze a resume against a job description",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resumeText": { "type": "string", "description": "Full resume content (min 50 chars)" },
+                  "jobDescription": { "type": "string", "description": "Job description text" }
+                },
+                "required": ["resumeText", "jobDescription"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis complete",
+            "content": {
+              "application/json": {
+                "example": {
+                  "matchScore": 75,
+                  "strengths": ["Relevant experience", "Technical skills alignment"],
+                  "gaps": ["Missing certification"],
+                  "suggestions": ["Add more quantifiable achievements"]
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/career/path": {
+      "post": {
+        "summary": "Get career path recommendations",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentRole": { "type": "string" },
+                  "experience": { "type": "number" },
+                  "skills": { "type": "array", "items": { "type": "string" } },
+                  "interests": { "type": "array", "items": { "type": "string" } },
+                  "goals": { "type": "string" }
+                },
+                "required": ["currentRole", "experience", "skills", "interests", "goals"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recommendations generated",
+            "content": {
+              "application/json": {
+                "example": {
+                  "recommendedPath": "Senior Frontend Developer → Tech Lead → Engineering Manager",
+                  "skillsToAcquire": ["React Advanced", "System Design"],
+                  "estimatedTime": "2-3 years"
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/email/status": {
+      "get": {
+        "summary": "Email service status",
+        "description": "Check if email service is configured",
+        "responses": {
+          "200": {
+            "description": "Status object",
+            "content": {
+              "application/json": {
+                "example": {
+                  "configured": false,
+                  "from": null,
+                  "mode": "dummy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/test": {
+      "post": {
+        "summary": "Send a test email",
+        "description": "Sends a test email (production requires API_KEY header)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "to": { "type": "string", "format": "email" },
+                  "subject": { "type": "string" },
+                  "message": { "type": "string" }
+                },
+                "required": ["to", "subject", "message"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email queued",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Test email queued to test@example.com"
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error" },
+          "403": { "description": "API key missing/invalid (production only)" }
+        }
+      }
+    }
+  }
+}

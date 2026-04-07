@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Dashboard</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script type="module" src="js/auth-guard.js"></script>
+</head>
+<body>
+  <header class="top-nav top-nav--bossed">
+    <div class="brand brand--bossed">InterviewPrep<span>AI</span></div>
+    <nav class="app-links" aria-label="Primary">
+      <a class="app-link" href="/dashboard">Dashboard</a>
+      <a class="app-link active" href="/profile.html">Profile</a>
+      <a class="app-link" href="/technical.html">Technical</a>
+      <a class="app-link" href="/hr.html">HR</a>
+      <a class="app-link" href="/dsa-practice.html">DSA Practice</a>
+      <a class="app-link" href="/aptitude-practice.html">Aptitude</a>
+    </nav>
+    <div class="top-actions">
+      <div class="profile-pill">
+        <span class="profile-pill__label">Logged in as</span>
+        <strong id="profile-name">User</strong>
+      </div>
+      <button id="logout-btn" class="ghost-btn">Logout</button>
+    </div>
+  </header>
+
+  <main class="bossed-dashboard profile-shell">
+    <section class="profile-layout">
+      <aside class="profile-sidebar">
+        <article class="profile-side-card">
+          <div class="profile-summary-card">
+            <div class="profile-avatar">IP</div>
+            <div>
+              <h1 id="profile-hero-name">User</h1>
+              <p id="profile-handle" class="muted">@interviewprep-user</p>
+            </div>
+          </div>
+
+          <p class="profile-rankline">
+            Consistency tier
+            <strong id="consistency-tier">Getting Started</strong>
+          </p>
+
+          <div class="profile-mini-stats">
+            <div>
+              <span>Active days</span>
+              <strong id="mini-active-days">0</strong>
+            </div>
+            <div>
+              <span>Current streak</span>
+              <strong id="mini-current-streak">0</strong>
+            </div>
+          </div>
+
+          <a class="primary-btn profile-edit-btn" href="/dashboard">Back to dashboard</a>
+        </article>
+
+        <article class="profile-side-card">
+          <div class="panel-head panel-head--compact">
+            <div>
+              <p class="section-label">Practice stats</p>
+              <h3>Snapshot</h3>
+            </div>
+          </div>
+          <div class="profile-stat-list">
+            <div class="profile-stat-row">
+              <span>Total sessions</span>
+              <strong id="stat-total-sessions">0</strong>
+            </div>
+            <div class="profile-stat-row">
+              <span>Average score</span>
+              <strong id="stat-average-score">0</strong>
+            </div>
+            <div class="profile-stat-row">
+              <span>Best score</span>
+              <strong id="stat-best-score">0</strong>
+            </div>
+            <div class="profile-stat-row">
+              <span>Last 7 days</span>
+              <strong id="stat-last-week">0</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="profile-side-card">
+          <div class="panel-head panel-head--compact">
+            <div>
+              <p class="section-label">Track focus</p>
+              <h3>Domains practiced</h3>
+            </div>
+          </div>
+          <div id="profile-domain-tags" class="profile-chip-list"></div>
+        </article>
+
+        <article class="profile-side-card">
+          <div class="panel-head panel-head--compact">
+            <div>
+              <p class="section-label">Strengths</p>
+              <h3>Module readiness</h3>
+            </div>
+          </div>
+          <div id="profile-module-bars" class="module-bars"></div>
+        </article>
+      </aside>
+
+      <section class="profile-main">
+        <section class="profile-top-grid">
+          <article class="profile-card-surface profile-progress-card">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">Progress</p>
+                <h2>Practice readiness</h2>
+              </div>
+              <div class="focus-pill" id="progress-focus-pill">Stay consistent</div>
+            </div>
+
+            <div class="profile-progress-layout">
+              <div class="progress-ring-wrap">
+                <div class="progress-ring" id="readiness-ring">
+                  <div class="progress-ring__inner">
+                    <strong id="readiness-score">0</strong>
+                    <span>readiness</span>
+                  </div>
+                </div>
+                <p class="muted" id="progress-caption">No sessions yet</p>
+              </div>
+
+              <div class="difficulty-stack">
+                <div class="difficulty-card difficulty-card--easy">
+                  <span>Easy</span>
+                  <strong id="difficulty-easy">0</strong>
+                </div>
+                <div class="difficulty-card difficulty-card--medium">
+                  <span>Medium</span>
+                  <strong id="difficulty-medium">0</strong>
+                </div>
+                <div class="difficulty-card difficulty-card--hard">
+                  <span>Hard</span>
+                  <strong id="difficulty-hard">0</strong>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="profile-card-surface profile-badge-card">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">Badges</p>
+                <h2>Milestones</h2>
+              </div>
+            </div>
+            <div class="badge-count" id="badge-count">0</div>
+            <div id="badge-list" class="badge-list"></div>
+            <div class="locked-badge-box">
+              <span>Next badge</span>
+              <strong id="next-badge-name">Complete your first session</strong>
+              <p id="next-badge-hint" class="muted">Start one interview to unlock your first milestone.</p>
+            </div>
+          </article>
+        </section>
+
+        <article class="profile-card-surface profile-heatmap-card">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Consistency</p>
+              <h2><span id="heatmap-active-days">0</span> active days in the past year</h2>
+            </div>
+            <div class="consistency-meta">
+              <span>Total sessions: <strong id="heatmap-total-sessions">0</strong></span>
+              <span>Max streak: <strong id="heatmap-max-streak">0</strong></span>
+              <span>Current streak: <strong id="heatmap-current-streak">0</strong></span>
+            </div>
+          </div>
+
+          <div id="consistency-heatmap" class="consistency-heatmap" aria-label="Practice heatmap"></div>
+          <div id="heatmap-months" class="heatmap-months"></div>
+          <div class="heatmap-legend">
+            <span>Less</span>
+            <div class="heatmap-dot heatmap-dot--0"></div>
+            <div class="heatmap-dot heatmap-dot--1"></div>
+            <div class="heatmap-dot heatmap-dot--2"></div>
+            <div class="heatmap-dot heatmap-dot--3"></div>
+            <span>More</span>
+          </div>
+        </article>
+
+        <article class="profile-card-surface profile-activity-card">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Recent activity</p>
+              <h2>Latest interview and practice runs</h2>
+            </div>
+          </div>
+
+          <div class="activity-tabs">
+            <button class="activity-tab active" type="button">Recent sessions</button>
+            <button class="activity-tab" type="button" disabled>Consistency</button>
+            <button class="activity-tab" type="button" disabled>Modules</button>
+          </div>
+
+          <div id="recent-activity-list" class="recent-activity-list"></div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="js/profile-page.js"></script>
+</body>
+</html>

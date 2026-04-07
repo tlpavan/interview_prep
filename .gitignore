@@ -1,0 +1,84 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.backup
+.env.example
+
+# Firebase
+firebase-debug.log
+firebase-debug.*.log
+firebase-debug.log
+firebase-debug.*.log
+
+# Database
+data/
+backend/data/
+*.sqlite
+*.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+server*.log
+backend/server*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Micro ` package manager
+.pnp/
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output
+
+#IDEA
+.idea/
+
+#VS Code
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp

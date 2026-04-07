@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATS Resume Builder</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script type="module" src="js/auth-guard.js"></script>
+</head>
+<body>
+  <header class="top-nav top-nav--bossed">
+    <div class="brand brand--bossed">InterviewPrep<span>AI</span></div>
+    <nav class="app-links" aria-label="Primary">
+      <a class="app-link" href="/dashboard">Dashboard</a>
+      <a class="app-link" href="/technical.html">Technical</a>
+      <a class="app-link" href="/hr.html">HR</a>
+      <a class="app-link active" href="/resume.html">Resume</a>
+      <a class="app-link" href="/career.html">Career</a>
+    </nav>
+    <div class="top-actions">
+      <div class="profile-pill">
+        <span class="profile-pill__label">Module</span>
+        <strong id="profile-name">ATS Resume Builder</strong>
+      </div>
+      <button id="logout-btn" class="ghost-btn">Logout</button>
+    </div>
+  </header>
+
+  <main class="bossed-dashboard">
+    <section class="library-hero">
+      <div>
+        <p class="section-label">Resume lab</p>
+        <h1 class="library-hero__title">Build an ATS-friendly resume, preview it, and download it.</h1>
+        <p class="library-hero__text">
+          Fill your details once and the page formats them into a clean ATS template. You can also paste or upload
+          an existing resume below for ATS analysis and keyword feedback.
+        </p>
+      </div>
+      <div class="library-hero__stats">
+        <div class="library-stat">
+          <span>Template</span>
+          <strong>Single-column ATS</strong>
+        </div>
+        <div class="library-stat">
+          <span>Export</span>
+          <strong>Download + Print PDF</strong>
+        </div>
+        <div class="library-stat">
+          <span>Analysis</span>
+          <strong>ATS score + suggestions</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="resume-builder-grid">
+      <article class="resume-form-card">
+        <div class="panel-head">
+          <div>
+            <p class="section-label">ATS builder</p>
+            <h2>Enter resume details</h2>
+          </div>
+          <div class="resume-builder-actions">
+            <button id="resume-download-btn" class="primary-btn" type="button">Download Resume</button>
+            <button id="resume-print-btn" class="ghost-btn" type="button">Print / Save PDF</button>
+          </div>
+        </div>
+
+        <section class="resume-section-card">
+          <h3>Basic details</h3>
+          <div class="resume-form-grid">
+            <input id="resume-full-name" type="text" placeholder="Full name" />
+            <input id="resume-role" type="text" placeholder="Target role" />
+            <input id="resume-email" type="email" placeholder="Email" />
+            <input id="resume-phone" type="text" placeholder="Phone" />
+            <input id="resume-location" type="text" placeholder="Location" />
+            <input id="resume-linkedin" type="text" placeholder="LinkedIn URL" />
+            <input id="resume-github" type="text" placeholder="GitHub URL" />
+            <input id="resume-portfolio" type="text" placeholder="Portfolio URL" />
+          </div>
+        </section>
+
+        <section class="resume-section-card">
+          <h3>Summary and skills</h3>
+          <textarea id="resume-summary" rows="5" placeholder="Professional summary"></textarea>
+          <textarea id="resume-skills" rows="4" placeholder="Skills separated by commas. Example: JavaScript, Node.js, React, SQL, AWS"></textarea>
+          <textarea id="resume-certifications" rows="4" placeholder="Certifications or achievements, one per line"></textarea>
+        </section>
+
+        <section class="resume-section-card">
+          <div class="panel-head panel-head--compact">
+            <div>
+              <p class="section-label">Experience</p>
+              <h3>Work history</h3>
+            </div>
+            <button id="add-experience-btn" class="ghost-btn" type="button">Add Experience</button>
+          </div>
+          <div id="experience-list" class="repeatable-list"></div>
+        </section>
+
+        <section class="resume-section-card">
+          <div class="panel-head panel-head--compact">
+            <div>
+              <p class="section-label">Projects</p>
+              <h3>Project highlights</h3>
+            </div>
+            <button id="add-project-btn" class="ghost-btn" type="button">Add Project</button>
+          </div>
+          <div id="project-list" class="repeatable-list"></div>
+        </section>
+
+        <section class="resume-section-card">
+          <div class="panel-head panel-head--compact">
+            <div>
+              <p class="section-label">Education</p>
+              <h3>Academic background</h3>
+            </div>
+            <button id="add-education-btn" class="ghost-btn" type="button">Add Education</button>
+          </div>
+          <div id="education-list" class="repeatable-list"></div>
+        </section>
+      </article>
+
+      <aside class="resume-preview-stack">
+        <article class="resume-preview-card">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Preview</p>
+              <h2>ATS template output</h2>
+            </div>
+            <div class="focus-pill">Auto updates</div>
+          </div>
+          <div id="resume-preview" class="resume-preview-shell"></div>
+        </article>
+
+        <article class="resume-form-card">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Analyzer</p>
+              <h2>Upload or paste existing resume</h2>
+            </div>
+          </div>
+          <input id="resume-file" type="file" accept=".pdf" />
+          <p class="muted">Upload PDF or paste resume text manually.</p>
+          <textarea id="resume-text" rows="10" placeholder="Paste your existing resume text here"></textarea>
+          <div class="resume-builder-actions">
+            <button id="analyze-resume-btn" class="primary-btn" type="button">Analyze Resume</button>
+          </div>
+          <pre id="resume-result"></pre>
+        </article>
+      </aside>
+    </section>
+  </main>
+
+  <template id="experience-item-template">
+    <article class="repeatable-item">
+      <div class="repeatable-item__head">
+        <strong>Experience item</strong>
+        <button class="ghost-btn" type="button" data-remove-item>Remove</button>
+      </div>
+      <div class="resume-form-grid">
+        <input type="text" data-field="role" placeholder="Role / title" />
+        <input type="text" data-field="company" placeholder="Company" />
+        <input type="text" data-field="dates" placeholder="Dates" />
+        <input type="text" data-field="location" placeholder="Location" />
+      </div>
+      <textarea rows="4" data-field="bullets" placeholder="Impact bullets, one per line"></textarea>
+    </article>
+  </template>
+
+  <template id="project-item-template">
+    <article class="repeatable-item">
+      <div class="repeatable-item__head">
+        <strong>Project item</strong>
+        <button class="ghost-btn" type="button" data-remove-item>Remove</button>
+      </div>
+      <div class="resume-form-grid">
+        <input type="text" data-field="name" placeholder="Project name" />
+        <input type="text" data-field="stack" placeholder="Stack / technologies" />
+        <input type="text" data-field="link" placeholder="Project link" />
+      </div>
+      <textarea rows="4" data-field="bullets" placeholder="Project bullets, one per line"></textarea>
+    </article>
+  </template>
+
+  <template id="education-item-template">
+    <article class="repeatable-item">
+      <div class="repeatable-item__head">
+        <strong>Education item</strong>
+        <button class="ghost-btn" type="button" data-remove-item>Remove</button>
+      </div>
+      <div class="resume-form-grid">
+        <input type="text" data-field="degree" placeholder="Degree / program" />
+        <input type="text" data-field="school" placeholder="Institution" />
+        <input type="text" data-field="dates" placeholder="Dates" />
+        <input type="text" data-field="details" placeholder="CGPA / coursework / distinction" />
+      </div>
+    </article>
+  </template>
+
+  <script type="module" src="js/resume-page.js"></script>
+</body>
+</html>

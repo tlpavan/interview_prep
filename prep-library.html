@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prep Library</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script type="module" src="js/auth-guard.js"></script>
+</head>
+<body>
+  <header class="top-nav top-nav--bossed">
+    <div class="brand brand--bossed">InterviewPrep<span>AI</span></div>
+    <nav class="app-links" aria-label="Primary">
+      <a class="app-link" href="/dashboard">Dashboard</a>
+      <a class="app-link" href="/dsa-practice.html">DSA Practice</a>
+      <a class="app-link" href="/technical.html">Technical</a>
+      <a class="app-link" href="/hr.html">HR</a>
+      <a class="app-link active" href="/prep-library.html">Prep Library</a>
+      <a class="app-link" href="/resume.html">Resume</a>
+      <a class="app-link" href="/career.html">Career</a>
+    </nav>
+    <div class="top-actions">
+      <div class="profile-pill">
+        <span class="profile-pill__label">Logged in as</span>
+        <strong id="profile-name">User</strong>
+      </div>
+      <button id="logout-btn" class="ghost-btn">Logout</button>
+    </div>
+  </header>
+
+  <main class="bossed-dashboard">
+    <section class="library-hero">
+      <div>
+        <p class="section-label">Company practice banks</p>
+        <h1 class="library-hero__title">Aptitude, DSA, and HR questions with ready answers.</h1>
+        <p class="library-hero__text">
+          Use this as a fast revision layer before interviews. Switch categories, filter by company,
+          search by topic, and open each card for a structured answer.
+        </p>
+      </div>
+      <div class="library-hero__stats">
+        <div class="library-stat">
+          <span>Categories</span>
+          <strong>3</strong>
+        </div>
+        <div class="library-stat">
+          <span>Question cards</span>
+          <strong id="library-total-count">0</strong>
+        </div>
+        <div class="library-stat">
+          <span>Companies</span>
+          <strong id="library-company-count">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="library-controls">
+      <div class="library-tabs" role="tablist" aria-label="Question categories">
+        <button class="library-tab active" type="button" data-category="aptitude">Aptitude</button>
+        <button class="library-tab" type="button" data-category="dsa">Technical DSA</button>
+        <button class="library-tab" type="button" data-category="hr">Technical HR</button>
+      </div>
+
+      <div class="library-filters">
+        <input id="library-search" type="search" placeholder="Search by topic, company, or keyword" />
+        <select id="library-company-filter">
+          <option value="all">All companies</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="library-summary">
+      <div class="focus-pill" id="library-status">Loading practice cards...</div>
+      <div class="resume-builder-actions">
+        <button class="primary-btn dashboard-action" data-target="/aptitude-practice.html" type="button">Open aptitude practice</button>
+        <button class="ghost-btn dashboard-action" data-target="/dsa-practice.html" type="button">Open DSA practice session</button>
+      </div>
+    </section>
+
+    <section id="library-grid" class="library-grid"></section>
+  </main>
+
+  <script type="module" src="js/prep-library.js"></script>
+</body>
+</html>

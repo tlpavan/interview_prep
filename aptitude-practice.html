@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aptitude Practice</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script type="module" src="js/auth-guard.js"></script>
+</head>
+<body>
+  <header class="top-nav top-nav--bossed">
+    <div class="brand brand--bossed">InterviewPrep<span>AI</span></div>
+    <nav class="app-links" aria-label="Primary">
+      <a class="app-link" href="/dashboard">Dashboard</a>
+      <a class="app-link active" href="/aptitude-practice.html">Aptitude Practice</a>
+      <a class="app-link" href="/dsa-practice.html">DSA Practice</a>
+      <a class="app-link" href="/technical.html">Technical</a>
+      <a class="app-link" href="/hr.html">HR</a>
+      <a class="app-link" href="/prep-library.html">Prep Library</a>
+    </nav>
+    <div class="top-actions">
+      <div class="profile-pill">
+        <span class="profile-pill__label">Module</span>
+        <strong id="profile-name">Aptitude Practice</strong>
+      </div>
+      <button id="logout-btn" class="ghost-btn">Logout</button>
+    </div>
+  </header>
+
+  <main class="bossed-dashboard">
+    <section class="library-hero">
+      <div>
+        <p class="section-label">Aptitude rounds</p>
+        <h1 class="library-hero__title">Practice 10-question aptitude sets with score, answers, and feedback.</h1>
+        <p class="library-hero__text">
+          Each topic contains 10 multiple-choice questions based on common MNC interview patterns.
+          Submit the set to see your marks, correct answers, and explanations for every question.
+        </p>
+      </div>
+      <div class="library-hero__stats">
+        <div class="library-stat">
+          <span>Topics</span>
+          <strong id="apt-topic-count">3</strong>
+        </div>
+        <div class="library-stat">
+          <span>Questions per topic</span>
+          <strong>10</strong>
+        </div>
+        <div class="library-stat">
+          <span>Format</span>
+          <strong>4 options each</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="library-controls">
+      <div class="library-tabs" role="tablist" aria-label="Aptitude topics">
+        <button class="library-tab active" data-topic="percentages" type="button">Percentages</button>
+        <button class="library-tab" data-topic="time-work" type="button">Time & Work</button>
+        <button class="library-tab" data-topic="reasoning" type="button">Logical Reasoning</button>
+      </div>
+      <div class="library-summary">
+        <div class="focus-pill" id="aptitude-status">Loading topic set...</div>
+      </div>
+    </section>
+
+    <section class="quiz-grid">
+      <article class="quiz-panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-label">Practice set</p>
+            <h2 id="aptitude-topic-title">Percentages</h2>
+          </div>
+          <button id="submit-aptitude-btn" class="primary-btn" type="button">Submit topic test</button>
+        </div>
+        <div id="aptitude-question-list" class="quiz-question-list"></div>
+      </article>
+
+      <aside class="quiz-result-panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-label">Result</p>
+            <h2>Marks and feedback</h2>
+          </div>
+          <div class="dsa-score" id="aptitude-score">0</div>
+        </div>
+        <p id="aptitude-feedback" class="dsa-verdict">Choose a topic, answer the 10 questions, and submit.</p>
+        <div id="aptitude-summary" class="test-summary-grid">
+          <div class="test-summary-card">
+            <span>Attempted</span>
+            <strong id="aptitude-attempted">0 / 10</strong>
+          </div>
+          <div class="test-summary-card">
+            <span>Correct</span>
+            <strong id="aptitude-correct">0 / 10</strong>
+          </div>
+          <div class="test-summary-card">
+            <span>Topic</span>
+            <strong id="aptitude-topic-pill">-</strong>
+          </div>
+        </div>
+        <div id="aptitude-review" class="quiz-review-list"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script type="module" src="js/aptitude-practice.js"></script>
+</body>
+</html>

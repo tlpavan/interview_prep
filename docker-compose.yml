@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: interviewprep-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - interviewprep-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: interviewprep-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      DATABASE_URL: ${DATABASE_URL:-mongodb://admin:password@mongodb:27017/interviewprep?authSource=admin}
+      # Optional: CORS origins (comma-separated)
+      # CORS_ORIGIN: ${CORS_ORIGIN:-https://yourdomain.com}
+      # Email configuration (if email service is enabled)
+      # SMTP_HOST: ${SMTP_HOST:-}
+      # SMTP_PORT: ${SMTP_PORT:-587}
+      # SMTP_USER: ${SMTP_USER:-}
+      # SMTP_PASS: ${SMTP_PASS:-}
+      # EMAIL_FROM: ${EMAIL_FROM:-noreply@example.com}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - backend_data:/app/data
+    networks:
+      - interviewprep-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => {if(r.statusCode!==200)throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mongodb_data:
+  backend_data:
+
+networks:
+  interviewprep-network:
+    driver: bridge

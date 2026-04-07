@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Environment files
+.env
+.env.*.local
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+backend/*.log
+
+# IDE
+.vscode
+.idea
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage
+.nyc_output
+
+# Build outputs
+dist
+build
+
+# Misc
+backend/data
+data
+
+# Documentation (optional, remove to reduce image size)
+# *.md

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSA Practice</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script type="module" src="js/auth-guard.js"></script>
+</head>
+<body>
+  <header class="top-nav top-nav--bossed">
+    <div class="brand brand--bossed">InterviewPrep<span>AI</span></div>
+    <nav class="app-links" aria-label="Primary">
+      <a class="app-link" href="/dashboard">Dashboard</a>
+      <a class="app-link active" href="/dsa-practice.html">DSA Practice</a>
+      <a class="app-link" href="/technical.html">Technical</a>
+      <a class="app-link" href="/hr.html">HR</a>
+      <a class="app-link" href="/prep-library.html">Prep Library</a>
+      <a class="app-link" href="/resume.html">Resume</a>
+      <a class="app-link" href="/career.html">Career</a>
+    </nav>
+    <div class="top-actions">
+      <div class="profile-pill">
+        <span class="profile-pill__label">Logged in as</span>
+        <strong id="profile-name">User</strong>
+      </div>
+      <button id="logout-btn" class="ghost-btn">Logout</button>
+    </div>
+  </header>
+
+  <main class="bossed-dashboard">
+    <section class="library-hero">
+      <div>
+        <p class="section-label">Coding practice session</p>
+        <h1 class="library-hero__title">Solve previously asked DSA patterns and get instant evaluation.</h1>
+        <p class="library-hero__text">
+          Pick a company-tagged coding question, write your approach or code, submit it for evaluation,
+          and review the model answer with complexity and implementation.
+        </p>
+      </div>
+      <div class="library-hero__stats">
+        <div class="library-stat">
+          <span>Questions loaded</span>
+          <strong id="dsa-count">0</strong>
+        </div>
+        <div class="library-stat">
+          <span>Selected company</span>
+          <strong id="dsa-company">-</strong>
+        </div>
+        <div class="library-stat">
+          <span>Selected difficulty</span>
+          <strong id="dsa-difficulty">-</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="dsa-layout">
+      <aside class="dsa-list-panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-label">Question bank</p>
+            <h2>Choose a coding problem</h2>
+          </div>
+        </div>
+        <div id="dsa-question-list" class="dsa-question-list"></div>
+      </aside>
+
+      <section class="dsa-workspace">
+        <article class="dsa-problem-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Selected question</p>
+              <h2 id="dsa-title">Loading question...</h2>
+            </div>
+            <div class="focus-pill" id="dsa-topic">-</div>
+          </div>
+          <p id="dsa-prompt" class="dsa-prompt"></p>
+          <ul id="dsa-constraints" class="dsa-constraints"></ul>
+          <section class="dsa-examples-panel">
+            <div class="panel-head panel-head--compact">
+              <div>
+                <p class="section-label">Visible examples</p>
+                <h3>Practice against sample cases</h3>
+              </div>
+              <div class="focus-pill" id="dsa-hidden-count">0 hidden tests</div>
+            </div>
+            <div id="dsa-examples" class="dsa-examples"></div>
+          </section>
+        </article>
+
+        <article class="dsa-answer-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Code workspace</p>
+              <h2>Write and evaluate your solution</h2>
+            </div>
+            <div class="code-toolbar">
+              <label class="language-select-wrap" for="dsa-language">
+                <span>Language</span>
+                <select id="dsa-language">
+                  <option value="javascript">JavaScript</option>
+                  <option value="python">Python</option>
+                  <option value="java">Java</option>
+                  <option value="cpp">C++</option>
+                </select>
+              </label>
+              <span class="editor-chip" id="dsa-entry-function">function</span>
+              <button id="load-starter-btn" class="ghost-btn" type="button">Load starter code</button>
+              <button id="clear-editor-btn" class="ghost-btn" type="button">Clear editor</button>
+            </div>
+          </div>
+          <div class="code-editor-shell">
+            <div class="code-editor-head">
+              <span id="dsa-language-label">JavaScript</span>
+              <span id="dsa-editor-hint">Implement the expected function and then run the evaluation.</span>
+            </div>
+            <textarea id="dsa-answer" class="code-editor" rows="18" spellcheck="false" placeholder="Write your JavaScript solution here..."></textarea>
+          </div>
+          <div class="dsa-actions">
+            <button id="evaluate-dsa-btn" class="primary-btn" type="button">Run tests + evaluate</button>
+            <div id="dsa-status" class="focus-pill">Pick a question and submit your answer.</div>
+          </div>
+        </article>
+
+        <article id="dsa-result" class="dsa-result-panel hidden">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Evaluation</p>
+              <h2>Review and correct answer</h2>
+            </div>
+            <div class="dsa-score" id="dsa-score">0</div>
+          </div>
+
+          <div class="dsa-result-grid">
+            <section class="dsa-feedback-card">
+              <h3>Evaluation summary</h3>
+              <p id="dsa-verdict" class="dsa-verdict"></p>
+              <div>
+                <h4>Strengths</h4>
+                <ul id="dsa-strengths"></ul>
+              </div>
+              <div>
+                <h4>Improvements</h4>
+                <ul id="dsa-improvements"></ul>
+              </div>
+            </section>
+
+            <section class="dsa-feedback-card">
+              <h3>Test results</h3>
+              <div class="test-summary-grid">
+                <div class="test-summary-card">
+                  <span>Visible</span>
+                  <strong id="dsa-visible-pass">0 / 0</strong>
+                </div>
+                <div class="test-summary-card">
+                  <span>Hidden</span>
+                  <strong id="dsa-hidden-pass">0 / 0</strong>
+                </div>
+                <div class="test-summary-card">
+                  <span>Status</span>
+                  <strong id="dsa-runtime-status">No runtime error</strong>
+                </div>
+              </div>
+              <div id="dsa-runtime-error" class="runtime-error hidden"></div>
+              <div id="dsa-visible-tests" class="test-list"></div>
+            </section>
+
+            <section class="dsa-feedback-card">
+              <h3>Correct approach</h3>
+              <p id="dsa-correct-approach"></p>
+              <div>
+                <h4>Steps</h4>
+                <ol id="dsa-correct-steps"></ol>
+              </div>
+              <p><strong>Complexity:</strong> <span id="dsa-complexity"></span></p>
+            </section>
+          </div>
+
+          <section class="dsa-solution-code">
+            <h3>Reference implementation</h3>
+            <pre id="dsa-code"></pre>
+          </section>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="js/dsa-practice.js"></script>
+</body>
+</html>

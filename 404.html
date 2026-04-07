@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 - Page Not Found</title>
+  <link rel="stylesheet" href="css/dashboard-flocareer.css">
+  <link rel="stylesheet" href="css/style-creative.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .error-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .error-content {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 500px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .error-code {
+      font-size: 6rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      line-height: 1;
+    }
+
+    .error-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 1rem;
+    }
+
+    .error-message {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    @media (max-width: 640px) {
+      .error-content {
+        padding: 2rem;
+        margin: 1rem;
+      }
+
+      .error-code {
+        font-size: 4rem;
+      }
+
+      .error-title {
+        font-size: 1.5rem;
+      }
+
+      .error-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="error-page">
+    <div class="error-content">
+      <div class="error-code">404</div>
+      <h1 class="error-title">Oops! Page Not Found</h1>
+      <p class="error-message">
+        The page you're looking for seems to have gone on an interview and never came back.
+        Don't worry, we'll help you get back on track!
+      </p>
+      <div class="error-actions">
+        <a href="/dashboard" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+          </svg>
+          Go to Dashboard
+        </a>
+        <button onclick="history.back()" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
+          Go Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Log 404 error for analytics
+    console.error('404 - Page not found:', window.location.href);
+
+    // Could send to analytics service here
+    if (navigator.sendBeacon) {
+      const data = JSON.stringify({
+        type: '404',
+        path: window.location.pathname,
+        referrer: document.referrer,
+        timestamp: new Date().toISOString()
+      });
+      navigator.sendBeacon('/api/log-error', data);
+    }
+  </script>
+</body>
+</html>

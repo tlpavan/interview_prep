@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Interview</title>
+  <link rel="stylesheet" href="css/style-creative.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script type="module" src="js/auth-guard.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body data-interview-type="hr">
+  <header class="top-nav top-nav--bossed">
+    <div class="brand brand--bossed">InterviewPrep<span>AI</span></div>
+    <nav class="app-links" aria-label="Primary">
+      <a class="app-link" href="/dashboard">Dashboard</a>
+      <a class="app-link" href="/technical.html">Technical</a>
+      <a class="app-link active" href="/hr.html">HR</a>
+      <a class="app-link" href="/dsa-practice.html">DSA Practice</a>
+      <a class="app-link" href="/resume.html">Resume</a>
+    </nav>
+    <div class="top-actions">
+      <div class="profile-pill">
+        <span class="profile-pill__label">Interview mode</span>
+        <strong id="profile-name">HR Round</strong>
+      </div>
+      <button id="logout-btn" class="ghost-btn">Logout</button>
+    </div>
+  </header>
+
+  <main class="bossed-dashboard">
+    <section class="library-hero">
+      <div>
+        <p class="section-label">HR mock interview</p>
+        <h1 class="library-hero__title">Interview starts with your name, then moves straight into HR questions.</h1>
+        <p class="library-hero__text">
+          Use the same mic and text workflow as the technical round. The mic test checks browser support,
+          permission state, live audio level, and transcript capture before the interview starts.
+        </p>
+      </div>
+      <div class="library-hero__stats">
+        <div class="library-stat">
+          <span>Round setup</span>
+          <strong>Name -> Difficulty -> Count</strong>
+        </div>
+        <div class="library-stat">
+          <span>Voice mode</span>
+          <strong>Speech + fallback capture</strong>
+        </div>
+        <div class="library-stat">
+          <span>Answer mode</span>
+          <strong>Mic or text</strong>
+        </div>
+      </div>
+    </section>
+
+    <section id="interview-area" class="interview-lab">
+      <div class="panel-head">
+        <div>
+          <p class="section-label">Interview console</p>
+          <h2 id="interview-title">HR Interview</h2>
+        </div>
+        <div id="interview-action-bar" class="interview-toolbar">
+          <button id="start-voice-btn" class="primary-btn" type="button">Start Interview</button>
+        </div>
+      </div>
+
+      <p id="mic-status" class="interview-status">Click start to begin interview.</p>
+
+      <section class="mic-diagnostics">
+        <div class="panel-head panel-head--compact">
+          <div>
+            <p class="section-label">Mic diagnostics</p>
+            <h3>Check whether the browser is actually hearing you</h3>
+          </div>
+          <div class="focus-pill" id="mic-path">Path: idle</div>
+        </div>
+
+        <div class="mic-metrics">
+          <article class="mic-metric-card">
+            <span>Support</span>
+            <strong id="mic-support">-</strong>
+          </article>
+          <article class="mic-metric-card">
+            <span>Permission</span>
+            <strong id="mic-permission">Unknown</strong>
+          </article>
+          <article class="mic-metric-card">
+            <span>Voice signal</span>
+            <strong id="mic-signal">Not tested</strong>
+          </article>
+        </div>
+
+        <div class="mic-device-row">
+          <label class="language-select-wrap" for="mic-device-select">
+            <span>Input device</span>
+            <select id="mic-device-select"></select>
+          </label>
+          <button id="refresh-mic-devices-btn" class="ghost-btn" type="button">Refresh devices</button>
+        </div>
+
+        <div class="mic-level-panel">
+          <div class="mic-level-head">
+            <span>Live input level</span>
+            <strong id="mic-level-text">0%</strong>
+          </div>
+          <div class="mic-level-track">
+            <div id="mic-level-fill" class="mic-level-fill"></div>
+          </div>
+          <p class="muted" id="mic-test-note">
+            Use Test Mic before the interview. The bar should move while you speak.
+          </p>
+        </div>
+      </section>
+
+      <div id="transcript-log"></div>
+    </section>
+
+    <section id="feedback-area" class="hidden">
+      <h2>Feedback</h2>
+      <div class="graph">Confidence<div class="bar" id="confidenceChart"></div></div>
+      <div class="graph">Vocabulary<div class="bar" id="vocabularyChart"></div></div>
+      <div class="graph">Technical<div class="bar" id="technicalChart"></div></div>
+      <ul id="suggestions"></ul>
+    </section>
+  </main>
+
+  <script type="module" src="js/interview-page.js"></script>
+  <script src="/js/auto-creative.js" defer></script>
+</body>
+</html>

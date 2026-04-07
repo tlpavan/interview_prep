@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(python3 -m json.tool)",
+      "Bash(netstat -ano)",
+      "Bash(ps -p 12776 -o comm=)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(npm start:*)",
+      "Bash(npx http-server:*)",
+      "Bash(findstr :8080)",
+      "Bash(pkill -f \"http-server\")",
+      "Bash(pkill -f \"node server.js\")",
+      "Bash(nodemon server.js)",
+      "Bash(npm list:*)",
+      "Bash(wc:*)",
+      "Bash(npm install:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(findstr :5000)",
+      "Bash(taskkill:*)",
+      "Bash(dir \"C:\\\\Users\\\\LAKSHMANA~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-LAKSHMANA-PAVAN-OneDrive-Desktop-interview-prep\\\\dcb2aeb4-25f9-4752-983b-de7c20b308fd\\\\tasks\\\\\" /b)",
+      "Bash(dir C:\\\\Users\\\\LAKSHMANA~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-LAKSHMANA-PAVAN-OneDrive-Desktop-interview-prep\\\\dcb2aeb4-25f9-4752-983b-de7c20b308fd\\\\tasks:*)"
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Career Path</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script type="module" src="js/auth-guard.js"></script>
+</head>
+<body>
+  <div class="profile-card">
+    <div class="avatar">AI</div>
+    <div>
+      <h4 id="profile-name">Career Path Teller</h4>
+      <p>Personalized roadmap planner</p>
+    </div>
+    <button id="logout-btn" style="margin-left:auto;">Logout</button>
+  </div>
+
+  <div id="interview-area">
+    <h2>Career Roadmap</h2>
+    <input id="skills-input" placeholder="Skills (e.g. JavaScript, Node.js)" style="width:100%; margin-bottom:10px;" />
+    <input id="goals-input" placeholder="Goal (e.g. Backend Engineer)" style="width:100%; margin-bottom:10px;" />
+    <button id="generate-career-btn">Generate Career Path</button>
+    <pre id="career-result" style="white-space: pre-wrap;"></pre>
+  </div>
+
+  <p><a href="/dashboard">Back to dashboard</a></p>
+  <script type="module" src="js/career-page.js"></script>
+</body>
+</html>
