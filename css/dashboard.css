@@ -19,6 +19,10 @@
   --radius-lg: 28px;
   --radius-md: 18px;
   --radius-sm: 12px;
+  /* Override creative.css variables for light theme */
+  --text-primary: #1f2c3d;
+  --text-secondary: #516273;
+  --text-muted: #94a3b8;
 }
 
 * {
