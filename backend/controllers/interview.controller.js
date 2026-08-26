@@ -19,13 +19,14 @@ import {
   getSessionSummary,
   saveModuleScore
 } from "../services/db.service.js";
+import { resolveAuthenticatedUser } from "../services/auth.service.js";
 import Joi from "joi";
 
 const startInterviewSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
   type: Joi.string().valid('technical', 'hr').required(),
   domain: Joi.string().max(100).optional().allow(''),
-  difficulty: Joi.string().valid('easy', 'medium', 'hard').required(),
+  difficulty: Joi.string().valid('easy', 'medium', 'hard').optional().default('medium'),
   totalQuestions: Joi.number().integer().min(1).max(20).required(),
   answers: Joi.array().items(
     Joi.object({
@@ -46,7 +47,8 @@ export const startInterview = async (req, res) => {
     }
 
     const { name, type, domain, difficulty, totalQuestions, answers = [] } = req.body;
-    const userId = req.headers["x-user-id"];
+    const user = await resolveAuthenticatedUser(req);
+    const userId = user?.id;
 
     const result = await runInterview({
       userName: name,
@@ -79,7 +81,8 @@ export const startInterview = async (req, res) => {
 export const recentInterviews = async (req, res) => {
   try {
     const limit = Number(req.query.limit) || 10;
-    const userId = req.headers["x-user-id"];
+    const user = await resolveAuthenticatedUser(req);
+    const userId = user?.id;
     const sessions = await getRecentSessions(limit, userId || undefined);
     res.json({ sessions });
   } catch (error) {
@@ -93,7 +96,8 @@ export const recentInterviews = async (req, res) => {
 export const sessionsSummary = async (req, res) => {
   try {
     const limit = Number(req.query.limit) || 50;
-    const userId = req.headers["x-user-id"];
+    const user = await resolveAuthenticatedUser(req);
+    const userId = user?.id;
     const summary = await getSessionSummary(limit, userId || undefined);
     res.json(summary);
   } catch (error) {
@@ -106,7 +110,8 @@ export const sessionsSummary = async (req, res) => {
 
 export const profileSummary = async (req, res) => {
   try {
-    const userId = req.headers["x-user-id"];
+    const user = await resolveAuthenticatedUser(req);
+    const userId = user?.id;
     const summary = await getProfileSummary(userId || undefined);
     res.json({ summary });
   } catch (error) {
@@ -171,7 +176,7 @@ const nextQuestionSchema = Joi.object({
   userName: Joi.string().optional(),
   interviewType: Joi.string().required(),
   domain: Joi.string().optional().allow(''),
-  difficulty: Joi.string().valid('easy', 'medium', 'hard').required(),
+  difficulty: Joi.string().valid('easy', 'medium', 'hard').optional().default('medium'),
   askedQuestions: Joi.number().integer().min(0).optional(),
   lastAnswer: Joi.string().optional().allow('')
 });
@@ -281,7 +286,8 @@ export const evaluateDsaPractice = async (req, res) => {
     }
 
     const { questionId, answer, language } = req.body;
-    const userId = req.headers["x-user-id"];
+    const user = await resolveAuthenticatedUser(req);
+    const userId = user?.id;
 
     const result = await evaluateDsaPracticeAnswer({
       questionId,

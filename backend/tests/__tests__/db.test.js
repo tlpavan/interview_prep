@@ -27,7 +27,7 @@ await fs.mkdir(dataDir, { recursive: true });
 describe('Database Service (JSON Fallback)', () => {
   beforeEach(async () => {
     // Clear database before each test
-    await fs.writeFile(testDbPath, JSON.stringify({ sessions: [], moduleScores: [] }), 'utf-8');
+    await fs.writeFile(testDbPath, JSON.stringify({ sessions: [], moduleScores: [], users: [] }), 'utf-8');
   });
 
   afterAll(async () => {

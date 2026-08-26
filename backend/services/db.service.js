@@ -24,7 +24,7 @@ async function ensureDbFile() {
   try {
     await fs.access(dbPath);
   } catch {
-    const initial = { sessions: [], moduleScores: [] };
+    const initial = { sessions: [], moduleScores: [], users: [] };
     await fs.writeFile(dbPath, JSON.stringify(initial, null, 2), "utf-8");
   }
 }
@@ -33,10 +33,14 @@ async function readJsonDb() {
   await ensureDbFile();
   try {
     const raw = await fs.readFile(dbPath, "utf-8");
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed.sessions)) parsed.sessions = [];
+    if (!Array.isArray(parsed.moduleScores)) parsed.moduleScores = [];
+    if (!Array.isArray(parsed.users)) parsed.users = [];
+    return parsed;
   } catch (error) {
     console.error("Error reading JSON database:", error);
-    return { sessions: [], moduleScores: [] };
+    return { sessions: [], moduleScores: [], users: [] };
   }
 }
 
@@ -238,8 +242,8 @@ export async function getProfileSummary(userId = null) {
         const scores = await ModuleScore.find({
           ...query,
           module
-        }).distinct("score");
-        summary[module] = avg(scores);
+        }).lean();
+        summary[module] = avg(scores.map(item => Number(item.score || 0)));
       }
 
       return summary;

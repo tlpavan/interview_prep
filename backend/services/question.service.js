@@ -1,4 +1,4 @@
-import { askGemini } from "./gemini.service.js";
+import { askAiJson, askGemini } from "./gemini.service.js";
 
 const TECH_QUESTIONS = {
   general: [
@@ -118,25 +118,31 @@ export async function generateInterviewQuestion({
   const type = String(interviewType || "").toLowerCase();
   const isHr = type.includes("hr");
   const normalized = normalizeDomain(domain);
-  const raw = await askGemini(`
-You are a strict ${interviewType} interviewer.
+  const parsed = await askAiJson(
+    `
+You are an expert mock interviewer.
 Candidate name: ${userName}.
+Interview type: ${isHr ? "HR" : "Technical"}.
 Question domain: ${isHr ? "general HR" : normalized}.
-Difficulty: ${difficulty}.
+Difficulty: ${difficulty || "medium"}.
 Question number: ${askedQuestions + 1}.
-Previous answer (if any): ${lastAnswer || "None"}.
+Previous answer: ${lastAnswer || "None"}.
 
-Return JSON only:
-{"question":"..."}
+Write the next interview question.
 Rules:
-- Ask only one concise interview question.
-- Address the candidate by name once.
-- No explanation.
-- If this is a technical interview, the question must be specifically about ${normalized}.
-- If this is an HR interview, ask only behavioral, communication, teamwork, motivation, or conflict-resolution questions.
-`);
+- Ask exactly one question.
+- Keep it concise and natural.
+- If technical, the question must stay in the selected technical domain.
+- If HR, ask only behavioral, teamwork, motivation, communication, leadership, or conflict questions.
+- If there was a previous answer, make the next question feel like a realistic follow-up or progression.
+- Address the candidate by name once at most.
 
-  const parsed = parseJsonBlock(raw, null);
+Schema:
+{"question":"string"}
+    `,
+    null
+  );
+
   if (parsed?.question) {
     return parsed.question;
   }

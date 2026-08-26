@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeChatbot();
     initializeModals();
     initializeEventListeners();
+    initializeQuickSearch();
 
     console.log('✅ Dashboard ready!');
     toast.success('Welcome back! Your dashboard is ready.');
@@ -123,7 +124,12 @@ function updateOverviewStats(sessions, summary) {
   const totalSessions = sessions.length;
   const scores = sessions.map(s => {
     const fb = s.feedback || {};
-    return clamp((fb.confidence || 0 + fb.vocabulary || 0 + fb.technical || 0 + fb.communication || 0) / 4);
+    return clamp(
+      ((fb.confidence || 0) +
+        (fb.vocabulary || 0) +
+        (fb.technical || 0) +
+        (fb.communication || 0)) / 4
+    );
   });
 
   const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
@@ -175,12 +181,19 @@ function calculateStreak(sessions) {
 
 // ===== UPDATE MODULE PROGRESS =====
 function updateModuleProgress(summary) {
-  const modules = ['technical', 'hr', 'dsa', 'resume', 'career', 'library'];
+  const modules = [
+    { key: 'technical', progressId: 'techProgress', textId: 'techProgressText' },
+    { key: 'hr', progressId: 'hrProgress', textId: 'hrProgressText' },
+    { key: 'dsa', progressId: 'dsaProgress', textId: 'dsaProgressText' },
+    { key: 'resume', progressId: 'resumeProgress', textId: 'resumeProgressText' },
+    { key: 'career', progressId: 'careerProgress', textId: 'careerProgressText' },
+    { key: 'library', progressId: 'libraryProgress', textId: 'libraryProgressText' }
+  ];
 
   modules.forEach(module => {
-    const score = clamp(summary[module] || 0);
-    const progressBar = document.getElementById(`${module}Progress`);
-    const progressText = document.getElementById(`${module}ProgressText`);
+    const score = clamp(summary[module.key] || 0);
+    const progressBar = document.getElementById(module.progressId);
+    const progressText = document.getElementById(module.textId);
 
     if (progressBar) {
       progressBar.setAttribute('data-progress', score);
@@ -226,10 +239,15 @@ function updateScoreSection(summary) {
   }
 
   // Update individual module scores
-  ['technical', 'hr', 'resume', 'career'].forEach((module, index) => {
-    const score = clamp(summary[module] || 0);
-    const valueEl = document.getElementById(`${module}ScoreValue`);
-    const miniProgress = document.getElementById(`${module}MiniProgress`);
+  [
+    { key: 'technical', valueId: 'techScoreValue', progressId: 'techMiniProgress' },
+    { key: 'hr', valueId: 'hrScoreValue', progressId: 'hrMiniProgress' },
+    { key: 'resume', valueId: 'resumeScoreValue', progressId: 'resumeMiniProgress' },
+    { key: 'career', valueId: 'careerScoreValue', progressId: 'careerMiniProgress' }
+  ].forEach((module, index) => {
+    const score = clamp(summary[module.key] || 0);
+    const valueEl = document.getElementById(module.valueId);
+    const miniProgress = document.getElementById(module.progressId);
 
     if (valueEl) {
       setTimeout(() => {
@@ -417,7 +435,7 @@ function loadJobOpenings() {
 
   // Build HTML
   const jobsHTML = mockOpenings.map(job => `
-    <a href="#" class="opening-card" onclick="alert('This would redirect to the job application page'); return false;">
+    <a href="https://www.linkedin.com/jobs/" target="_blank" rel="noopener noreferrer" class="opening-card">
       <div class="opening-header">
         <div>
           <div class="opening-company">${job.company}</div>
@@ -469,7 +487,7 @@ const chatbotFAQ = [
   },
   {
     q: 'How is my data stored?',
-    a: 'Your data is securely stored and is private to your account only. We use Firebase for authentication and local storage for your progress. Your information is never shared.'
+    a: 'Your data is stored privately for your account through the backend application. Interview sessions, scores, resume insights, and roadmap activity stay tied to your login and are not shared.'
   }
 ];
 
@@ -552,11 +570,17 @@ function initializeModals() {
   const overlays = document.querySelectorAll('.modal-overlay');
 
   aboutTriggers.forEach(trigger => {
-    trigger.addEventListener('click', () => openModal(aboutModal));
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      openModal(aboutModal);
+    });
   });
 
   contactTriggers.forEach(trigger => {
-    trigger.addEventListener('click', () => openModal(contactModal));
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      openModal(contactModal);
+    });
   });
 
   closeButtons.forEach(btn => {
@@ -572,7 +596,21 @@ function initializeModals() {
   if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      alert('Thank you for your message! We will get back to you soon. 🎉');
+      const name = document.getElementById('contactName')?.value?.trim() || '';
+      const email = document.getElementById('contactEmail')?.value?.trim() || '';
+      const message = document.getElementById('contactMessage')?.value?.trim() || '';
+
+      if (!name || !email || !message) {
+        toast.error('Please fill in your name, email, and message.');
+        return;
+      }
+
+      const subject = `InterviewPrep AI contact from ${name}`;
+      const body = [`Name: ${name}`, `Email: ${email}`, '', message].join('\n');
+      const mailtoUrl = `mailto:contact@interviewprep.ai?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      window.location.href = mailtoUrl;
+      toast.success('Your email app is opening with the message ready to send.');
       closeAllModals();
       contactForm.reset();
     });
@@ -621,7 +659,13 @@ function initializeNavigation() {
 function handleNavigation(action) {
   const routes = {
     'start-technical': '/technical.html',
-    'start-hr': '/hr.html'
+    'start-hr': '/hr.html',
+    'technical': '/technical.html',
+    'hr': '/hr.html',
+    'dsa': '/dsa-practice.html',
+    'resume': '/resume.html',
+    'career': '/career.html',
+    'library': '/prep-library.html'
   };
 
   const path = routes[action];
@@ -648,6 +692,21 @@ function navigateToModule(module) {
 
 // ===== EVENT LISTENERS =====
 function initializeEventListeners() {
+  const helpBtn = document.getElementById('helpBtn');
+  if (helpBtn) {
+    helpBtn.addEventListener('click', () => {
+      document.getElementById('chatbotWindow')?.classList.remove('hidden');
+      document.getElementById('chatbotInput')?.focus();
+    });
+  }
+
+  const notificationsBtn = document.getElementById('notificationsBtn');
+  if (notificationsBtn) {
+    notificationsBtn.addEventListener('click', () => {
+      toast.info('No new alerts right now. Complete a practice round to generate fresh insights.');
+    });
+  }
+
   // Logout
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
@@ -677,6 +736,40 @@ function initializeEventListeners() {
       const speed = (index + 1) * 0.1;
       circle.style.transform = `translateY(${scrolled * speed}px)`;
     });
+  });
+}
+
+function initializeQuickSearch() {
+  const searchInput = document.querySelector('.search-input');
+  if (!searchInput) return;
+
+  const selectors = ['.module-card', '.opening-card', '.link-card'];
+  const emptyStateId = 'dashboardSearchEmptyState';
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    selectors.forEach(selector => {
+      document.querySelectorAll(selector).forEach(card => {
+        const matches = !query || card.textContent.toLowerCase().includes(query);
+        card.style.display = matches ? '' : 'none';
+        if (matches) visibleCount += 1;
+      });
+    });
+
+    let emptyState = document.getElementById(emptyStateId);
+    if (!visibleCount && query) {
+      if (!emptyState) {
+        emptyState = document.createElement('div');
+        emptyState.id = emptyStateId;
+        emptyState.className = 'empty-message';
+        searchInput.closest('.nav-search')?.insertAdjacentElement('afterend', emptyState);
+      }
+      emptyState.textContent = `No dashboard matches for "${searchInput.value.trim()}".`;
+    } else if (emptyState) {
+      emptyState.remove();
+    }
   });
 }
 
@@ -738,13 +831,15 @@ function initializeScrollReveal() {
 
 async function handleLogout() {
   try {
-    const { apiFetch } = await import('./js/api-base.js');
+    const { apiFetch } = await import('./api-base.js');
     await apiFetch('/api/auth/logout', { method: 'POST' });
   } catch (error) {
     console.error('Logout error:', error);
   } finally {
     localStorage.removeItem('userData');
     localStorage.removeItem('userId');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authMode');
     window.location.href = '/';
   }
 }
@@ -845,3 +940,4 @@ style.textContent = `
 document.head.appendChild(style);
 
 console.log('🎯 FloCareer Dashboard Loaded Successfully!');
+

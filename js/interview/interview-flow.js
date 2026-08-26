@@ -420,6 +420,7 @@ async function captureBySpeechApi(attempt = 1) {
 
     activeRecognition = recognition;
     let transcript = "";
+    let sawFinalResult = false;
     const startedAt = Date.now();
     let timeout = null;
     let silenceTimeout = null;
@@ -465,7 +466,7 @@ async function captureBySpeechApi(attempt = 1) {
       setMicStatus("Processing your speech...");
       logSystem("SpeechRecognition speech end");
       // Don't stop immediately on interim results, wait a bit
-      if (transcript && settled) {
+      if (transcript && sawFinalResult) {
         stopSoon();
       }
     };
@@ -489,7 +490,7 @@ async function captureBySpeechApi(attempt = 1) {
 
         // Stop soon if final result
         if (isFinal) {
-          settled = true;
+          sawFinalResult = true;
           stopSoon();
         }
       }
@@ -1100,13 +1101,6 @@ async function postJson(url, payload) {
   return data;
 }
 
-function normalizeDifficulty(raw) {
-  const text = String(raw || "").toLowerCase();
-  if (text.includes("hard")) return "hard";
-  if (text.includes("easy")) return "easy";
-  return "medium";
-}
-
 function parseQuestionCount(raw) {
   const words = {
     one: 1, two: 2, three: 3, four: 4, five: 5,
@@ -1149,9 +1143,11 @@ function showFeedback(data) {
   const confidence = document.getElementById("confidenceChart");
   const vocabulary = document.getElementById("vocabularyChart");
   const technical = document.getElementById("technicalChart");
+  const communication = document.getElementById("communicationChart");
   if (confidence) confidence.style.width = `${data.confidence || 0}%`;
   if (vocabulary) vocabulary.style.width = `${data.vocabulary || 0}%`;
   if (technical) technical.style.width = `${data.technical || 0}%`;
+  if (communication) communication.style.width = `${data.communication || 0}%`;
 
   const ul = document.getElementById("suggestions");
   if (!ul) return;
@@ -1175,7 +1171,7 @@ export async function beginInterview(type) {
     sessionState.interviewType = type;
     sessionState.userName = null;
     sessionState.domain = null;
-    sessionState.difficulty = null;
+    sessionState.difficulty = "medium";
     sessionState.totalQuestions = 0;
     sessionState.askedQuestions = 0;
 
@@ -1196,17 +1192,12 @@ export async function beginInterview(type) {
       addTranscriptLine(`Domain: ${sessionState.domain}`);
     }
 
-    await speak(`Hi ${sessionState.userName}. Say or type the difficulty.`);
-    const rawDifficulty = await listenWithChoice("difficulty");
-    sessionState.difficulty = normalizeDifficulty(rawDifficulty.transcript);
-    addTranscriptLine(`Difficulty: ${sessionState.difficulty}`);
-
     await speak("Say or type the number of questions.");
     const rawCount = await listenWithChoice("question count");
     sessionState.totalQuestions = parseQuestionCount(rawCount.transcript);
     addTranscriptLine(`Question count: ${sessionState.totalQuestions}`);
     addTranscriptLine(
-      `Setup complete: ${sessionState.userName} | ${sessionState.domain || "general"} | ${sessionState.difficulty} | ${sessionState.totalQuestions} questions`
+      `Setup complete: ${sessionState.userName} | ${sessionState.domain || "general"} | ${sessionState.totalQuestions} questions`
     );
 
     const answers = [];

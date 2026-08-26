@@ -1,13 +1,12 @@
 import { auth, provider } from "./firebase.js";
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   onAuthStateChanged,
-  updateProfile
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { apiFetch } from "./api-base.js";
 
 const loginMsg = document.getElementById("msg-login");
 const registerMsg = document.getElementById("msg-register");
@@ -29,6 +28,10 @@ const highlightWords = [
   "Microsoft problem solving",
   "Google-style mock rounds"
 ];
+
+if (window.localStorage.getItem("authMode") === "backend" && window.localStorage.getItem("authToken")) {
+  window.location.href = "dashboard";
+}
 
 function setMessage(el, text, tone = "error") {
   if (!el) return;
@@ -58,6 +61,29 @@ function setBusy(button, busy, busyText, defaultText) {
   if (!button) return;
   button.disabled = busy;
   button.textContent = busy ? busyText : defaultText;
+}
+
+function storeBackendSession(payload) {
+  const user = payload?.user || {};
+  if (user.id) {
+    window.localStorage.setItem("userId", user.id);
+  }
+  if (payload?.token) {
+    window.localStorage.setItem("authToken", payload.token);
+  }
+  window.localStorage.setItem("userData", JSON.stringify({
+    displayName: user.name || user.email || "User",
+    email: user.email || "",
+    uid: user.id || ""
+  }));
+  window.localStorage.setItem("authMode", "backend");
+}
+
+function clearBackendSession() {
+  window.localStorage.removeItem("userId");
+  window.localStorage.removeItem("authToken");
+  window.localStorage.removeItem("userData");
+  window.localStorage.removeItem("authMode");
 }
 
 function togglePassword(targetId, toggleBtn) {
@@ -105,11 +131,19 @@ function startHighlightRotation() {
 }
 
 onAuthStateChanged(auth, user => {
+  if (window.localStorage.getItem("authMode") === "backend") {
+    return;
+  }
   if (user) {
-    // Store user ID for API requests
     if (user.uid) {
       window.localStorage.setItem("userId", user.uid);
     }
+    window.localStorage.setItem("authMode", "firebase");
+    window.localStorage.setItem("userData", JSON.stringify({
+      displayName: user.displayName || user.email || "User",
+      email: user.email || "",
+      uid: user.uid || ""
+    }));
     window.location.href = "dashboard";
   }
 });
@@ -137,19 +171,22 @@ window.registerUser = async () => {
 
   try {
     setBusy(registerButton, true, "Creating account...", "Create Account");
-    const credential = await createUserWithEmailAndPassword(auth, email, password);
-    if (credential.user && name) {
-      await updateProfile(credential.user, { displayName: name });
+    const response = await apiFetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password })
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload?.error || "Registration failed.");
     }
+    await signOut(auth).catch(() => {});
+    storeBackendSession(payload);
     setMessage(registerMsg, "Account created. Redirecting...", "success");
     window.location.href = "dashboard";
   } catch (err) {
-    if (err.code === "auth/email-already-in-use") {
+    if (String(err.message).includes("exists")) {
       setMessage(registerMsg, "Account already exists. Login instead.");
-    } else if (err.code === "auth/invalid-email") {
-      setMessage(registerMsg, "Invalid email format.");
-    } else if (err.code === "auth/operation-not-allowed") {
-      setMessage(registerMsg, "Email/password signup is disabled in Firebase settings.");
     } else {
       setMessage(registerMsg, err.message || "Registration failed.");
     }
@@ -171,10 +208,20 @@ window.loginUser = async () => {
 
   try {
     setBusy(loginButton, true, "Signing in...", "Login");
-    await signInWithEmailAndPassword(auth, email, password);
+    const response = await apiFetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload?.error || "Login failed.");
+    }
+    await signOut(auth).catch(() => {});
+    storeBackendSession(payload);
     window.location.href = "dashboard";
   } catch (err) {
-    if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+    if (String(err.message).toLowerCase().includes("invalid")) {
       setMessage(loginMsg, "Invalid email or password.");
     } else {
       setMessage(loginMsg, err.message || "Login failed.");
@@ -186,6 +233,7 @@ window.loginUser = async () => {
 
 window.googleLogin = async () => {
   clearMessages();
+  clearBackendSession();
 
   try {
     setBusy(googleButton, true, "Connecting Google...", "Continue with Google");

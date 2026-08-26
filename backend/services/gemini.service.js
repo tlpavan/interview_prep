@@ -176,6 +176,27 @@ async function askViaOpenAi(prompt) {
   };
 }
 
+function extractJsonBlock(text) {
+  if (typeof text !== "string") return null;
+  const cleaned = text
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/, "")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      return null;
+    }
+  }
+}
+
 async function askViaGemini(prompt) {
   for (const model of GEMINI_TEXT_MODELS) {
     const result = await geminiRequest(model, {
@@ -337,61 +358,58 @@ async function transcribeViaGemini({ audioBase64, mimeType = "audio/webm" }) {
 }
 
 export async function askGemini(prompt) {
-  // Try Gemini FIRST (primary AI brain)
-  const gemini = await askViaGemini(prompt);
-  if (gemini.ok) {
-    return gemini.text;
-  }
-
-  // Fallback to OpenAI only if Gemini fails
+  // Prefer OpenAI first for structured interview and resume flows.
   const openAi = await askViaOpenAi(prompt);
   if (openAi.ok) {
     return openAi.text;
+  }
+
+  const gemini = await askViaGemini(prompt);
+  if (gemini.ok) {
+    return gemini.text;
   }
 
   return "No response";
 }
 
 export async function checkGeminiHealth() {
-  // Check Gemini FIRST
-  const gemini = await askViaGemini("Reply with OK");
-  if (gemini.ok) {
-    return {
-      ok: true,
-      reason: `AI reachable via ${gemini.provider} ${gemini.model}`
-    };
-  }
-
-  // Then check OpenAI as fallback
   const openAi = await askViaOpenAi("Reply with OK");
   if (openAi.ok) {
     return {
       ok: true,
-      reason: `AI reachable via ${openAi.provider} ${openAi.model} (Gemini unavailable)`
+      reason: `AI reachable via ${openAi.provider} ${openAi.model}`
     };
   }
 
-  return {
-    ok: false,
-    reason: gemini.error || openAi.error || "No AI provider available"
-  };
+  const gemini = await askViaGemini("Reply with OK");
+  if (gemini.ok) {
+    return {
+      ok: true,
+      reason: `AI reachable via ${gemini.provider} ${gemini.model} (OpenAI unavailable)`
+    };
+  }
+
+  return { ok: false, reason: openAi.error || gemini.error || "No AI provider available" };
 }
 
 export async function transcribeAudioWithGemini({
   audioBase64,
   mimeType = "audio/webm"
 }) {
-  // Try Gemini FIRST for transcription
-  const gemini = await transcribeViaGemini({ audioBase64, mimeType });
-  if (gemini.ok) {
-    return gemini.text;
-  }
-
-  // Fallback to OpenAI only if Gemini fails
   const openAi = await transcribeViaOpenAi({ audioBase64, mimeType });
   if (openAi.ok) {
     return openAi.text;
   }
 
+  const gemini = await transcribeViaGemini({ audioBase64, mimeType });
+  if (gemini.ok) {
+    return gemini.text;
+  }
+
   return "";
+}
+
+export async function askAiJson(prompt, fallback = null) {
+  const raw = await askGemini(`${prompt}\nReturn valid JSON only.`);
+  return extractJsonBlock(raw) || fallback;
 }

@@ -16,10 +16,15 @@ btn?.addEventListener("click", async () => {
 
   result.textContent = "Generating roadmap...";
   try {
+    const skillList = skills
+      .split(",")
+      .map(item => item.trim())
+      .filter(Boolean);
+
     const res = await apiFetch("/api/career/path", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ skills, goals })
+      body: JSON.stringify({ skills: skillList, goals })
     });
     const data = await res.json();
     if (!res.ok) {

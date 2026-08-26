@@ -1,5 +1,6 @@
 import { askGemini } from "../services/gemini.service.js";
 import { saveModuleScore } from "../services/db.service.js";
+import { resolveAuthenticatedUser } from "../services/auth.service.js";
 import Joi from "joi";
 
 function buildFallbackRoadmap(skills, goals) {
@@ -20,7 +21,10 @@ function buildFallbackRoadmap(skills, goals) {
 }
 
 const careerPathSchema = Joi.object({
-  skills: Joi.array().items(Joi.string()).min(1).required(),
+  skills: Joi.alternatives().try(
+    Joi.array().items(Joi.string()).min(1),
+    Joi.string().min(2)
+  ).required(),
   goals: Joi.string().min(5).max(500).required()
 });
 
@@ -34,8 +38,16 @@ export async function careerPath(req, res) {
       });
     }
 
-    const { skills, goals } = req.body;
-    const userId = req.headers["x-user-id"];
+    const rawSkills = req.body.skills;
+    const skills = Array.isArray(rawSkills)
+      ? rawSkills
+      : String(rawSkills || "")
+          .split(",")
+          .map(item => item.trim())
+          .filter(Boolean);
+    const { goals } = req.body;
+    const user = await resolveAuthenticatedUser(req);
+    const userId = user?.id;
 
     const aiRoadmap = await askGemini(
       `Create a career roadmap for skills: ${skills}

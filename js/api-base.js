@@ -1,8 +1,11 @@
 const explicitBase = window.localStorage.getItem("apiBaseUrl") || "";
 
 function getCurrentUserId() {
-  // Try to get from session storage (set by auth.js after login)
   return window.localStorage.getItem("userId") || "";
+}
+
+function getAuthToken() {
+  return window.localStorage.getItem("authToken") || "";
 }
 
 function inferApiBase() {
@@ -27,7 +30,12 @@ export function apiUrl(path) {
 
 export function apiFetch(path, options = {}) {
   const userId = getCurrentUserId();
+  const authToken = getAuthToken();
   const headers = new Headers(options.headers || {});
+
+  if (authToken) {
+    headers.set("Authorization", `Bearer ${authToken}`);
+  }
 
   if (userId) {
     headers.set("X-User-Id", userId);

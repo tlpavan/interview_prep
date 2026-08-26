@@ -12,12 +12,16 @@ const fileInput = document.getElementById("resume-file");
 const previewEl = document.getElementById("resume-preview");
 const downloadBtn = document.getElementById("resume-download-btn");
 const printBtn = document.getElementById("resume-print-btn");
+const improveBtn = document.getElementById("resume-improve-btn");
 const addExperienceBtn = document.getElementById("add-experience-btn");
 const addProjectBtn = document.getElementById("add-project-btn");
 const addEducationBtn = document.getElementById("add-education-btn");
 const experienceListEl = document.getElementById("experience-list");
 const projectListEl = document.getElementById("project-list");
 const educationListEl = document.getElementById("education-list");
+const builderStatusEl = document.getElementById("resume-builder-status");
+
+const RESUME_BUILDER_STORAGE_KEY = "resumeBuilderData";
 
 const fieldIds = [
   "resume-full-name",
@@ -113,6 +117,35 @@ function getResumeData() {
       item => item.degree || item.school || item.details
     )
   };
+}
+
+function buildAnalyzerTextFromBuilder(data = getResumeData()) {
+  const lines = [
+    data.fullName,
+    data.role,
+    data.email,
+    data.phone,
+    data.location,
+    data.summary,
+    data.skills.length ? `Skills: ${data.skills.join(", ")}` : "",
+    data.certifications.length ? `Certifications: ${data.certifications.join(", ")}` : ""
+  ];
+
+  data.experience.forEach(item => {
+    lines.push(`Experience: ${item.role || ""} at ${item.company || ""} ${item.dates || ""} ${item.location || ""}`.trim());
+    item.bullets.forEach(bullet => lines.push(bullet));
+  });
+
+  data.projects.forEach(item => {
+    lines.push(`Project: ${item.name || ""} ${item.stack || ""} ${item.link || ""}`.trim());
+    item.bullets.forEach(bullet => lines.push(bullet));
+  });
+
+  data.education.forEach(item => {
+    lines.push(`Education: ${item.degree || ""} ${item.school || ""} ${item.dates || ""} ${item.details || ""}`.trim());
+  });
+
+  return lines.filter(Boolean).join("\n");
 }
 
 function contactLink(label, value) {
@@ -308,6 +341,11 @@ function buildResumeDocument(data) {
 function renderResumePreview() {
   const data = getResumeData();
   previewEl.innerHTML = buildResumeMarkup(data);
+  window.localStorage.setItem(RESUME_BUILDER_STORAGE_KEY, JSON.stringify(data));
+}
+
+function setBuilderStatus(text) {
+  if (builderStatusEl) builderStatusEl.textContent = text;
 }
 
 function wireRepeatableItem(item) {
@@ -337,6 +375,41 @@ function addRepeatableItem(section, values = {}) {
   });
   wireRepeatableItem(item);
   target.appendChild(item);
+}
+
+function populateBuilder(data = {}) {
+  fieldIds.forEach(id => {
+    const field = getField(id);
+    if (!field) return;
+    const key = id.replace(/^resume-/, "").replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
+    const value = data[key];
+    field.value = Array.isArray(value) ? value.join("\n") : value || "";
+  });
+
+  if (getField("resume-skills")) {
+    getField("resume-skills").value = Array.isArray(data.skills) ? data.skills.join(", ") : (data.skills || "");
+  }
+  if (getField("resume-certifications")) {
+    getField("resume-certifications").value = Array.isArray(data.certifications)
+      ? data.certifications.join("\n")
+      : (data.certifications || "");
+  }
+
+  experienceListEl.innerHTML = "";
+  projectListEl.innerHTML = "";
+  educationListEl.innerHTML = "";
+
+  (data.experience || []).forEach(item => addRepeatableItem("experience", {
+    ...item,
+    bullets: Array.isArray(item.bullets) ? item.bullets.join("\n") : item.bullets || ""
+  }));
+  (data.projects || []).forEach(item => addRepeatableItem("project", {
+    ...item,
+    bullets: Array.isArray(item.bullets) ? item.bullets.join("\n") : item.bullets || ""
+  }));
+  (data.education || []).forEach(item => addRepeatableItem("education", item));
+
+  renderResumePreview();
 }
 
 function downloadResumeDocument() {
@@ -429,7 +502,13 @@ async function extractTextFromPdf(file) {
 }
 
 async function analyzeResume() {
-  const resumeText = resumeTextInput?.value?.trim() || "";
+  let resumeText = resumeTextInput?.value?.trim() || "";
+  if (!resumeText) {
+    resumeText = buildAnalyzerTextFromBuilder();
+    if (resumeTextInput) {
+      resumeTextInput.value = resumeText;
+    }
+  }
   if (!resumeText) {
     analysisResultEl.textContent = "Please upload a PDF or paste resume text first.";
     return;
@@ -444,12 +523,76 @@ async function analyzeResume() {
     });
     const data = await res.json();
     if (!res.ok) {
-      analysisResultEl.textContent = data?.details || data?.error || "Resume analysis failed.";
+      const detailText = Array.isArray(data?.details) ? data.details.join("\n") : (data?.details || "");
+      analysisResultEl.textContent = detailText || data?.error || "Resume analysis failed.";
       return;
     }
     renderAnalysis(data.analysis);
   } catch (error) {
     analysisResultEl.textContent = `Error: ${error.message}`;
+  }
+}
+
+async function improveResumeBuilder() {
+  const payload = getResumeData();
+  setBuilderStatus("Improving resume content with AI...");
+  if (improveBtn) improveBtn.disabled = true;
+
+  try {
+    const res = await apiFetch("/api/resume/improve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setBuilderStatus(data?.details || data?.error || "AI improvement failed.");
+      return;
+    }
+
+    const improved = data.improved || {};
+    if (getField("resume-summary") && improved.summary) {
+      getField("resume-summary").value = improved.summary;
+    }
+    if (getField("resume-skills") && Array.isArray(improved.skills)) {
+      getField("resume-skills").value = improved.skills.join(", ");
+    }
+
+    if (Array.isArray(improved.experience) && improved.experience.length) {
+      experienceListEl.innerHTML = "";
+      improved.experience.forEach(item => addRepeatableItem("experience", {
+        ...item,
+        bullets: Array.isArray(item.bullets) ? item.bullets.join("\n") : ""
+      }));
+    }
+
+    if (Array.isArray(improved.projects) && improved.projects.length) {
+      projectListEl.innerHTML = "";
+      improved.projects.forEach(item => addRepeatableItem("project", {
+        ...item,
+        bullets: Array.isArray(item.bullets) ? item.bullets.join("\n") : ""
+      }));
+    }
+
+    renderResumePreview();
+    setBuilderStatus("AI improvements applied to the builder.");
+  } catch (error) {
+    setBuilderStatus(`Error: ${error.message}`);
+  } finally {
+    if (improveBtn) improveBtn.disabled = false;
+  }
+}
+
+function loadSavedBuilder() {
+  try {
+    const raw = window.localStorage.getItem(RESUME_BUILDER_STORAGE_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    populateBuilder(parsed);
+    setBuilderStatus("Loaded your last saved resume builder draft.");
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -465,7 +608,9 @@ fileInput?.addEventListener("change", async () => {
     analysisResultEl.textContent = "Extracting text from PDF...";
     const text = await extractTextFromPdf(file);
     resumeTextInput.value = text;
-    analysisResultEl.textContent = "PDF text extracted. Click Analyze Resume.";
+    analysisResultEl.textContent = text.trim().length >= 20
+      ? "PDF text extracted. Click Analyze Resume."
+      : "The PDF text looks short, but you can still analyze it now. Add more text if the result is weak.";
   } catch (error) {
     analysisResultEl.textContent = `Failed to read PDF: ${error.message}`;
   }
@@ -474,6 +619,7 @@ fileInput?.addEventListener("change", async () => {
 analyzeBtn?.addEventListener("click", analyzeResume);
 downloadBtn?.addEventListener("click", downloadResumeDocument);
 printBtn?.addEventListener("click", printResumeDocument);
+improveBtn?.addEventListener("click", improveResumeBuilder);
 addExperienceBtn?.addEventListener("click", () => addRepeatableItem("experience"));
 addProjectBtn?.addEventListener("click", () => addRepeatableItem("project"));
 addEducationBtn?.addEventListener("click", () => addRepeatableItem("education"));
@@ -482,5 +628,7 @@ fieldIds.forEach(id => {
   getField(id)?.addEventListener("input", renderResumePreview);
 });
 
-seedBuilder();
-renderResumePreview();
+if (!loadSavedBuilder()) {
+  seedBuilder();
+  renderResumePreview();
+}

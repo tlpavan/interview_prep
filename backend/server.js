@@ -11,6 +11,7 @@ import winston from "winston";
 import interviewRoutes from "./routes/interview.routes.js";
 import resumeRoutes from "./routes/resume.routes.js";
 import careerRoutes from "./routes/career.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 import emailRoutes from "./controllers/email.controller.js";
 import { env } from "./config/env.js";
 import { connectDatabase, disconnectDatabase, isDatabaseConnected } from "./config/database.js";
@@ -123,7 +124,9 @@ app.get("/health", (_req, res) => {
     status: "healthy",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: env.NODE_ENV
+    environment: env.NODE_ENV,
+    persistence: isDatabaseConnected() ? "mongodb" : "json-fallback",
+    databaseConnected: isDatabaseConnected()
   });
 });
 
@@ -137,6 +140,7 @@ app.get("/dashboard", (req, res) => {
 app.use("/api/interview", interviewRoutes);
 app.use("/api/resume", resumeRoutes);
 app.use("/api/career", careerRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use("/api/email", emailRoutes);
 

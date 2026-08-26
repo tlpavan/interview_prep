@@ -1,15 +1,20 @@
 import { auth } from "./firebase.js";
-import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { apiFetch } from "./api-base.js";
 
 function bindLogout() {
   const btn = document.getElementById("logout-btn");
   if (!btn) return;
   btn.addEventListener("click", async () => {
-    await signOut(auth);
+    const authToken = window.localStorage.getItem("authToken");
+    if (authToken) {
+      await apiFetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    }
+    await signOut(auth).catch(() => {});
     window.localStorage.removeItem("userId");
+    window.localStorage.removeItem("authToken");
+    window.localStorage.removeItem("authMode");
+    window.localStorage.removeItem("userData");
     window.location.href = "/";
   });
 }
@@ -34,11 +39,39 @@ function setProfile(user) {
   }));
 }
 
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    window.location.href = "/";
-    return;
+(async function initAuthGuard() {
+  const authToken = window.localStorage.getItem("authToken");
+  if (authToken) {
+    try {
+      const response = await apiFetch("/api/auth/me");
+      if (response.ok) {
+        const payload = await response.json();
+        const user = payload?.user;
+        if (user?.id) {
+          setProfile({
+            displayName: user.name,
+            email: user.email,
+            uid: user.id
+          });
+          bindLogout();
+          return;
+        }
+      }
+      window.localStorage.removeItem("authToken");
+      window.localStorage.removeItem("authMode");
+      window.localStorage.removeItem("userId");
+      window.localStorage.removeItem("userData");
+    } catch {
+      // Fall back to Firebase auth if backend session check fails.
+    }
   }
-  setProfile(user);
-  bindLogout();
-});
+
+  onAuthStateChanged(auth, user => {
+    if (!user) {
+      window.location.href = "/";
+      return;
+    }
+    setProfile(user);
+    bindLogout();
+  });
+})();

@@ -1,4 +1,4 @@
-import { askGemini } from "./gemini.service.js";
+import { askAiJson } from "./gemini.service.js";
 
 const defaultFeedback = {
   confidence: 0,
@@ -129,6 +129,7 @@ export async function runInterview({
   maxQuestions,
   answers = []
 }) {
+  const isHr = String(interviewType || "").toLowerCase().includes("hr");
   const transcript = answers.length
     ? answers
         .map((item, index) =>
@@ -139,30 +140,48 @@ export async function runInterview({
 
   const local = fallbackFeedback(answers);
 
-  const feedback = await askGemini(`
-Simulate a ${interviewType} interview evaluation for candidate ${userName}.
-Difficulty: ${difficulty}.
+  const ai = parseFeedback(
+    JSON.stringify(
+      (await askAiJson(
+        `
+You are evaluating a ${interviewType} mock interview for ${userName}.
+Difficulty: ${difficulty || "medium"}.
 Question count: ${maxQuestions}.
-Use the following interview transcript:
-${transcript}
-Return only valid JSON with this exact schema:
-{
-  "confidence": number from 0 to 100,
-  "vocabulary": number from 0 to 100,
-  "technical": number from 0 to 100,
-  "communication": number from 0 to 100,
-  "suggestions": string[]
-}
-`);
 
-  const ai = parseFeedback(feedback);
+Interview transcript:
+${transcript}
+
+Score the interview using this rubric:
+- confidence: delivery confidence, certainty, composure
+- vocabulary: clarity and quality of language
+- technical: technical correctness and depth. For HR interviews, score answer relevance, structure, and professionalism instead of hard technical depth.
+- communication: organization, directness, completeness, clarity
+
+Return JSON with this exact schema:
+{
+  "confidence": number,
+  "vocabulary": number,
+  "technical": number,
+  "communication": number,
+  "suggestions": ["string", "string", "string"]
+}
+
+Rules:
+- Scores must be 0-100.
+- Suggestions must be specific and actionable.
+- For HR interviews, suggestions should focus on behavioral storytelling, clarity, confidence, and professionalism.
+        `,
+        null
+      )) || {}
+    )
+  );
 
   return {
     confidence: clampScore(
       ai.confidence ? ai.confidence * 0.6 + local.confidence * 0.4 : local.confidence
     ),
     vocabulary: ai.vocabulary || local.vocabulary,
-    technical: ai.technical || local.technical,
+    technical: ai.technical || (isHr ? clampScore((local.communication + local.vocabulary) / 2) : local.technical),
     communication: ai.communication || local.communication,
     suggestions: ai.suggestions?.length ? ai.suggestions : local.suggestions
   };

@@ -313,6 +313,23 @@ npm start
 
 The backend will run on `http://localhost:5000`
 
+### Production Notes
+
+- In `production`, `DATABASE_URL` is required. The backend will no longer silently fall back to JSON storage.
+- In `production`, `CORS_ORIGIN` must be set to your real frontend domain. `*` is rejected.
+- To migrate existing local JSON data into MongoDB after you add `DATABASE_URL`, run:
+
+```bash
+cd backend
+npm run migrate:json-to-mongo
+```
+
+- The health endpoint now reports whether persistence is using MongoDB or the JSON fallback:
+
+```bash
+GET /health
+```
+
 ### Frontend Setup
 
 1. **Install dependencies**:
