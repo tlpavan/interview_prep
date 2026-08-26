@@ -68,9 +68,18 @@ app.use(helmet({
 }));
 
 // CORS configuration
-const corsOrigins = env.CORS_ORIGIN ? env.CORS_ORIGIN.split(',') : ['http://localhost:8080', 'http://localhost:3000'];
+const corsOrigins = env.CORS_ORIGIN
+  ? env.CORS_ORIGIN.split(',').map(origin => origin.trim()).filter(Boolean)
+  : ['http://localhost:8080', 'http://localhost:3000'];
 app.use(cors({
-  origin: corsOrigins,
+  origin: (origin, callback) => {
+    if (!origin || corsOrigins.includes('*') || corsOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Origin is not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id']
