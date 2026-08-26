@@ -353,6 +353,16 @@ npx http-server
 
 Access the application at `http://localhost:5000` or `http://localhost:8080` (depending on your server)
 
+### Deploying the Frontend Separately
+
+GitHub Pages can host the frontend files, but it cannot run the Express backend. Deploy `backend/` to a Node.js host first, then open the frontend with the backend URL in the `apiBase` query parameter:
+
+```text
+https://<owner>.github.io/<repository>/index.html?apiBase=https%3A%2F%2F<backend-host>
+```
+
+The API client stores this value in `localStorage`, so it only needs to be provided once per browser. Configure the backend `CORS_ORIGIN` environment variable with the exact GitHub Pages origin, for example `https://<owner>.github.io`.
+
 ## Usage Guide
 
 ### 1. Authentication

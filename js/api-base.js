@@ -1,4 +1,19 @@
-const explicitBase = window.localStorage.getItem("apiBaseUrl") || "";
+function getConfiguredBase() {
+  const queryBase = new URLSearchParams(window.location.search).get("apiBase");
+  const metaBase = document.querySelector('meta[name="api-base-url"]')?.content;
+  const configuredBase =
+    queryBase ||
+    window.__INTERVIEW_PREP_API_BASE__ ||
+    metaBase ||
+    window.localStorage.getItem("apiBaseUrl") ||
+    "";
+
+  if (queryBase) {
+    window.localStorage.setItem("apiBaseUrl", queryBase);
+  }
+
+  return String(configuredBase).trim().replace(/\/+$/, "");
+}
 
 function getCurrentUserId() {
   return window.localStorage.getItem("userId") || "";
@@ -9,10 +24,11 @@ function getAuthToken() {
 }
 
 function inferApiBase() {
-  if (explicitBase) return explicitBase.replace(/\/+$/, "");
+  const configuredBase = getConfiguredBase();
+  if (configuredBase) return configuredBase;
 
   const { protocol, hostname, port } = window.location;
-  if (port === "5500") {
+  if (["3000", "5500", "8080"].includes(port)) {
     return `${protocol}//${hostname}:5000`;
   }
   return "";
