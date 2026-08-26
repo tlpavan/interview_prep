@@ -1,6 +1,5 @@
 import { auth, provider } from "./firebase.js";
 import {
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   onAuthStateChanged,
@@ -86,6 +85,18 @@ function clearBackendSession() {
   window.localStorage.removeItem("authMode");
 }
 
+function storeFirebaseSession(user) {
+  if (user?.uid) {
+    window.localStorage.setItem("userId", user.uid);
+  }
+  window.localStorage.setItem("authMode", "firebase");
+  window.localStorage.setItem("userData", JSON.stringify({
+    displayName: user?.displayName || user?.email || "User",
+    email: user?.email || "",
+    uid: user?.uid || ""
+  }));
+}
+
 function togglePassword(targetId, toggleBtn) {
   const input = document.getElementById(targetId);
   if (!input || !toggleBtn) return;
@@ -135,22 +146,38 @@ onAuthStateChanged(auth, user => {
     return;
   }
   if (user) {
-    if (user.uid) {
-      window.localStorage.setItem("userId", user.uid);
-    }
-    window.localStorage.setItem("authMode", "firebase");
-    window.localStorage.setItem("userData", JSON.stringify({
-      displayName: user.displayName || user.email || "User",
-      email: user.email || "",
-      uid: user.uid || ""
-    }));
+    storeFirebaseSession(user);
     window.location.href = "dashboard";
   }
 });
 
-getRedirectResult(auth).catch(() => {
-  setMessage(loginMsg, "Google login failed");
+getRedirectResult(auth).then(result => {
+  if (result?.user) {
+    clearBackendSession();
+    storeFirebaseSession(result.user);
+    window.location.href = "dashboard";
+  }
+}).catch(err => {
+  console.error("Google redirect error:", err);
+  setMessage(loginMsg, getGoogleErrorMessage(err));
 });
+
+function getGoogleErrorMessage(err) {
+  switch (err?.code) {
+    case "auth/operation-not-allowed":
+      return "Google sign-in is disabled in Firebase. Enable the Google provider and try again.";
+    case "auth/unauthorized-domain":
+      return `This site is not authorized for Google sign-in. Add ${window.location.hostname} to Firebase Authorized domains.`;
+    case "auth/popup-blocked":
+      return "Your browser blocked the Google sign-in window. Allow popups for this site and try again.";
+    case "auth/network-request-failed":
+      return "Could not reach Google sign-in. Check your internet connection and try again.";
+    case "auth/popup-closed-by-user":
+      return "Google sign-in was cancelled. Try again.";
+    default:
+      return "Google login failed. You can try email/password instead.";
+  }
+}
 
 window.registerUser = async () => {
   clearMessages();
@@ -233,19 +260,14 @@ window.loginUser = async () => {
 
 window.googleLogin = async () => {
   clearMessages();
-  clearBackendSession();
 
   try {
     setBusy(googleButton, true, "Connecting Google...", "Continue with Google");
-    await signInWithPopup(auth, provider);
-    window.location.href = "dashboard";
-  } catch {
-    try {
-      await signInWithRedirect(auth, provider);
-    } catch {
-      setMessage(loginMsg, "Google login failed.");
-      setBusy(googleButton, false, "Connecting Google...", "Continue with Google");
-    }
+    await signInWithRedirect(auth, provider);
+  } catch (err) {
+    console.error("Google login error:", err);
+    setMessage(loginMsg, getGoogleErrorMessage(err));
+    setBusy(googleButton, false, "Connecting Google...", "Continue with Google");
   }
 };
 
