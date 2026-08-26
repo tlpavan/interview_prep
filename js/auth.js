@@ -29,7 +29,7 @@ const highlightWords = [
 ];
 
 if (window.localStorage.getItem("authMode") === "backend" && window.localStorage.getItem("authToken")) {
-  window.location.href = "dashboard";
+  window.location.href = "dashboard.html";
 }
 
 function setMessage(el, text, tone = "error") {
@@ -147,7 +147,7 @@ onAuthStateChanged(auth, user => {
   }
   if (user) {
     storeFirebaseSession(user);
-    window.location.href = "dashboard";
+    window.location.href = "dashboard.html";
   }
 });
 
@@ -155,7 +155,7 @@ getRedirectResult(auth).then(result => {
   if (result?.user) {
     clearBackendSession();
     storeFirebaseSession(result.user);
-    window.location.href = "dashboard";
+    window.location.href = "dashboard.html";
   }
 }).catch(err => {
   console.error("Google redirect error:", err);
@@ -210,7 +210,7 @@ window.registerUser = async () => {
     await signOut(auth).catch(() => {});
     storeBackendSession(payload);
     setMessage(registerMsg, "Account created. Redirecting...", "success");
-    window.location.href = "dashboard";
+    window.location.href = "dashboard.html";
   } catch (err) {
     if (String(err.message).includes("exists")) {
       setMessage(registerMsg, "Account already exists. Login instead.");
@@ -246,7 +246,7 @@ window.loginUser = async () => {
     }
     await signOut(auth).catch(() => {});
     storeBackendSession(payload);
-    window.location.href = "dashboard";
+    window.location.href = "dashboard.html";
   } catch (err) {
     if (String(err.message).toLowerCase().includes("invalid")) {
       setMessage(loginMsg, "Invalid email or password.");

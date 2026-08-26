@@ -110,7 +110,7 @@ onAuthStateChanged(auth, user => {
     if (user.uid) {
       localStorage.setItem("userId", user.uid);
     }
-    window.location.href = "dashboard";
+    window.location.href = "dashboard.html";
   }
 });
 
@@ -139,7 +139,7 @@ window.registerUser = async () => {
     }
     setMessage(registerMsg, "🎉 Account created! Redirecting...", "success");
     setTimeout(() => {
-      window.location.href = "dashboard";
+      window.location.href = "dashboard.html";
     }, 1000);
   } catch (err) {
     console.error("Registration error:", err);
