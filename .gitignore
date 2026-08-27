@@ -3,7 +3,7 @@
 .env.local
 .env.*.local
 .env.backup
-.env.example
+# .env.example (tracked as a repository example)
 
 # Firebase
 firebase-debug.log
