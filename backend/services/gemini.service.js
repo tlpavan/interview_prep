@@ -396,16 +396,21 @@ export async function transcribeAudioWithGemini({
   audioBase64,
   mimeType = "audio/webm"
 }) {
+  console.log(`🎙️ Starting audio transcription (${(audioBase64.length / 1024).toFixed(1)}KB, ${mimeType})`);
+  
   const openAi = await transcribeViaOpenAi({ audioBase64, mimeType });
+  console.log(`📊 OpenAI result:`, openAi.ok ? `OK (${openAi.model})` : `FAILED (${openAi.error})`);
   if (openAi.ok) {
     return openAi.text;
   }
 
   const gemini = await transcribeViaGemini({ audioBase64, mimeType });
+  console.log(`📊 Gemini result:`, gemini.ok ? `OK (${gemini.model})` : `FAILED (${gemini.error})`);
   if (gemini.ok) {
     return gemini.text;
   }
 
+  console.error(`❌ All transcription providers failed`);
   return "";
 }
 

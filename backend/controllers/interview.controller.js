@@ -236,12 +236,18 @@ export const transcribeAudio = async (req, res) => {
 
     const { audioBase64, mimeType } = req.body;
     const cleanBase64 = String(audioBase64).replace(/^data:[^,]+,/, "");
-    const transcript = await transcribeAudioWithGemini({
+    console.log(`🎤 Transcribing audio (${(cleanBase64.length / 1024).toFixed(1)}KB, ${mimeType})`);
+    
+    const result = await transcribeAudioWithGemini({
       audioBase64: cleanBase64,
       mimeType: mimeType || "audio/webm"
     });
+    
+    console.log(`📝 Transcription result:`, result);
+    const transcript = result?.text || result;
 
     if (!transcript) {
+      console.warn(`⚠️ Transcription failed: empty result`);
       return res.status(422).json({
         error: "Could not transcribe audio"
       });
