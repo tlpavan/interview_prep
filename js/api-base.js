@@ -31,6 +31,11 @@ function inferApiBase() {
   if (["3000", "5500", "8080"].includes(port)) {
     return `${protocol}//${hostname}:5000`;
   }
+
+  if (hostname.endsWith("github.io")) {
+    return "";
+  }
+
   return "";
 }
 

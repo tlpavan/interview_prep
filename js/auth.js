@@ -47,6 +47,23 @@ function clearMessages() {
   setMessage(registerMsg, "");
 }
 
+async function parseApiResponse(response) {
+  const rawText = await response.text();
+  if (!rawText) return {};
+
+  try {
+    return JSON.parse(rawText);
+  } catch (error) {
+    const snippet = rawText.replace(/\s+/g, " ").trim().slice(0, 180);
+    const htmlHint = /<!doctype html|<html|<body|<script/i.test(rawText)
+      ? "This usually means the backend is not running or the GitHub Pages site is calling the wrong origin."
+      : "The server response was not valid JSON.";
+
+    const msg = `${htmlHint} Response preview: ${snippet || "empty response"}`;
+    throw new Error(msg);
+  }
+}
+
 function setMode(mode) {
   const showLogin = mode === "login";
   loginPanel?.classList.toggle("active", showLogin);
@@ -203,19 +220,22 @@ window.registerUser = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password })
     });
-    const payload = await response.json();
+    const payload = await parseApiResponse(response);
     if (!response.ok) {
-      throw new Error(payload?.error || "Registration failed.");
+      throw new Error(payload?.error || payload?.message || "Registration failed.");
     }
     await signOut(auth).catch(() => {});
     storeBackendSession(payload);
     setMessage(registerMsg, "Account created. Redirecting...", "success");
     window.location.href = "dashboard.html";
   } catch (err) {
-    if (String(err.message).includes("exists")) {
+    const message = String(err.message || "Registration failed.");
+    if (message.toLowerCase().includes("exists")) {
       setMessage(registerMsg, "Account already exists. Login instead.");
+    } else if (message.toLowerCase().includes("backend") || message.toLowerCase().includes("not valid json") || message.toLowerCase().includes("github pages")) {
+      setMessage(registerMsg, "The backend is not configured for GitHub Pages. Add ?apiBase=https://your-backend-url to the page URL, or deploy the backend separately.");
     } else {
-      setMessage(registerMsg, err.message || "Registration failed.");
+      setMessage(registerMsg, message);
     }
   } finally {
     setBusy(registerButton, false, "Creating account...", "Create Account");
@@ -240,18 +260,21 @@ window.loginUser = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
-    const payload = await response.json();
+    const payload = await parseApiResponse(response);
     if (!response.ok) {
-      throw new Error(payload?.error || "Login failed.");
+      throw new Error(payload?.error || payload?.message || "Login failed.");
     }
     await signOut(auth).catch(() => {});
     storeBackendSession(payload);
     window.location.href = "dashboard.html";
   } catch (err) {
-    if (String(err.message).toLowerCase().includes("invalid")) {
+    const message = String(err.message || "Login failed.");
+    if (message.toLowerCase().includes("invalid")) {
       setMessage(loginMsg, "Invalid email or password.");
+    } else if (message.toLowerCase().includes("backend") || message.toLowerCase().includes("not valid json") || message.toLowerCase().includes("github pages")) {
+      setMessage(loginMsg, "The backend is not configured for GitHub Pages. Add ?apiBase=https://your-backend-url to the page URL, or deploy the backend separately.");
     } else {
-      setMessage(loginMsg, err.message || "Login failed.");
+      setMessage(loginMsg, message);
     }
   } finally {
     setBusy(loginButton, false, "Signing in...", "Login");
