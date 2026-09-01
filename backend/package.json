@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "start:all": "concurrently \"npm start\" \"npm run python:start\"",
+    "python:start": "cd ../python-backend && python app.py",
+    "python:install": "cd ../python-backend && pip install -r requirements.txt",
     "migrate:json-to-mongo": "node scripts/migrate-json-to-mongo.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
